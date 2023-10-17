@@ -212,11 +212,16 @@ def get_table_download_link(df, **kwargs):
 
 def load_files(file_list):
     #file_list = glob.glob(os.path.join(output_dir, "*"))
-    adata_list=[]
+    i=0
     for file in file_list:
         adata = sc.read_h5ad(file)
-        adata_list.append(adata)
-    adata_merge = anndata.concat(adata_list,index_unique=None)
+        if i == 0:
+            adata_merge = adata
+            i += 1
+        else:
+            adata_merge = anndata.concat([adata_merge,adata],index_unique=None)
+            i += 1
+        del(adata)
     print(adata_merge)
     return(adata_merge)
 
