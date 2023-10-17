@@ -201,8 +201,10 @@ def get_table_download_link(df, **kwargs):
     return(href)
 
 
-def load_files(output_dir):
-    file_list = glob.glob(os.path.join(output_dir, "*"))
+
+
+def load_files(file_list):
+    #file_list = glob.glob(os.path.join(output_dir, "*"))
     i=0
     for file in file_list:
         adata = sc.read_h5ad(file)
@@ -213,9 +215,13 @@ def load_files(output_dir):
             adata_merge = adata_merge.concatenate(adata,index_unique=None)
             i += 1
         del(adata)
-        print(adata_merge)
     return(adata_merge)
-    
+
+def chunk_array(arr, chunk_size):
+    for i in range(0, len(arr), chunk_size):
+        yield arr[i:i + chunk_size]
+        
+ 
 
 
 # Return GBM treatment data as a data frame.
@@ -223,7 +229,23 @@ def load_files(output_dir):
 def load_h5ad_file(workingdir):
     #df = pd.read_csv('SampleTreatment.txt',sep="\t")
     #adata_merge = sc.read_h5ad('input/'+workingdir+'/'+'scanpy_adata_merge_15249_unregress.h5ad')
-    adata_merge = load_files('input/'+workingdir+'/scanpy_adata_merge_15249_unregress/')
+    #adata_merge = load_files('input/'+workingdir+'/scanpy_adata_merge_15249_unregress/')
+    ### load the chunked ###
+    output_dir = 'input/'+workingdir+'/scanpy_adata_merge_15249_unregress/'
+    file_list = glob.glob(os.path.join(output_dir, "*"))
+    chunk_size = 5
+    chunked_file_list = list(chunk_array(file_list, chunk_size))
+    i=0
+    for file_list_sub in chunked_file_list:
+        adata = load_files(file_list_sub)
+        if i == 0:
+            adata_merge = adata
+            i += 1
+        else:
+            adata_merge = adata_merge.concatenate(adata,index_unique=None)
+            i += 1
+        del(adata)
+    ######
     description = pd.read_csv('input/'+workingdir+'/'+'description.txt',sep="\t")
     cellpop = pd.read_csv('input/'+workingdir+'/'+'cellpop.txt',sep="\t")
     return(adata_merge,description,cellpop)
