@@ -490,29 +490,30 @@ with tab3:
     else:
         st.write("Please click the \"Perform wilcoxon analysis\" botton for the data processing.")
         st.stop()
-        
-    res_pd = get_wilcoxon_result(adata_merge_filtered,selected_cluster)
-    
-    
-    score_max = int(np.floor(max(res_pd['scores'].values)))
-    score_min = int(np.floor(min(res_pd['scores'].values)))
-    lf_max = int(np.floor(max(res_pd['logfoldchanges'].values)))
-    lf_min = int(np.floor(min(res_pd['logfoldchanges'].values)))
-    
-    st.markdown("Scores and log foldchange cutoff.")
-    user_score_min, user_score_max = st.slider('scores', 
-                                   max_value=score_max,
-                                   min_value=score_min,
-                                   value=(-3, 3))
-    user_lf_min, user_lf_max = st.slider('log foldchanges', 
-                                   max_value=float(lf_max), 
-                                   min_value=float(lf_min),
-                                   value=(-1.0, 1.0))
-    res_pd_filter = marker_filter(res_pd,user_score_min, user_score_max,user_lf_min, user_lf_max)
-    
-    st.subheader(fileName+" differetially expressed genes sorted by scores (-log(p-value)*Fold Change).")
-    st.write(res_pd_filter)
-    st.markdown(get_table_download_link(pd.DataFrame(res_pd_filter), fileName = fileName+'_DEG list result'), unsafe_allow_html=True)
+    if method_name in adata_merge.uns:
+        if str(selected_cluster) in pd.DataFrame(adata_merge_filtered.uns[method_name]['names']).keys():        
+            res_pd = get_wilcoxon_result(adata_merge_filtered,selected_cluster)
+            
+            
+            score_max = int(np.floor(max(res_pd['scores'].values)))
+            score_min = int(np.floor(min(res_pd['scores'].values)))
+            lf_max = int(np.floor(max(res_pd['logfoldchanges'].values)))
+            lf_min = int(np.floor(min(res_pd['logfoldchanges'].values)))
+            
+            st.markdown("Scores and log foldchange cutoff.")
+            user_score_min, user_score_max = st.slider('scores', 
+                                           max_value=score_max,
+                                           min_value=score_min,
+                                           value=(-3, 3))
+            user_lf_min, user_lf_max = st.slider('log foldchanges', 
+                                           max_value=float(lf_max), 
+                                           min_value=float(lf_min),
+                                           value=(-1.0, 1.0))
+            res_pd_filter = marker_filter(res_pd,user_score_min, user_score_max,user_lf_min, user_lf_max)
+            
+            st.subheader(fileName+" differetially expressed genes sorted by scores (-log(p-value)*Fold Change).")
+            st.write(res_pd_filter)
+            st.markdown(get_table_download_link(pd.DataFrame(res_pd_filter), fileName = fileName+'_DEG list result'), unsafe_allow_html=True)
 
 
 #sampleNames=[]
