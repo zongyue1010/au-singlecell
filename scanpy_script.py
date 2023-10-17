@@ -611,7 +611,8 @@ with tab4:
                     val=-np.log(row[2])/np.log(10)
                     PAG_val[pag_id]=val
             filtered_output['SAMPLE'] = "c"+str(selected_cluster)
-            PAGERSet = PAGERSet.append(filtered_output)
+            #PAGERSet = PAGERSet.append(filtered_output)
+            PAGERSet = pd.concat([PAGERSet, filtered_output])
             st.markdown(get_table_download_link(filtered_output, fileName = fileName +' geneset enrichment result'), unsafe_allow_html=True)
         PAGERSet = pd.DataFrame(PAGERSet)
 
