@@ -174,6 +174,8 @@ st.sidebar.subheader('Code source')
 link = 'The scanpy python script is [https://scanpy-tutorials.readthedocs.io/en/latest/index.html](https://scanpy-tutorials.readthedocs.io/en/latest/index.html)'
 st.sidebar.markdown(link, unsafe_allow_html=True)
 
+
+
 #st.sidebar.text("1.NHBE: Primary human lung epithelium.\n2.A549: Lung alveolar.\n3.Calu3:The transformed lung-derived Calu-3 cells.\n4.Lung: The lung samples.\n5.NP: The nasopharyngeal samples.\n6.PBMC: The peripheral blood mononuclear cell.\n7.Leukocyte: The leukocytes.\n8.hiPSC:Human induced pluripotent stem cell-derived cardiomyocytes\n9.Liver Organoid.\n10.Pancreas Organoid")
 workingdir = st.sidebar.selectbox(
     'select a pre-processed single cell dataset::',
@@ -183,6 +185,10 @@ link = "1.mouse_NK is natural killer cells from mouse samples. (confidential)"
 st.sidebar.markdown(link, unsafe_allow_html=True)
 
 st.sidebar.markdown('You selected `%s`' % workingdir)
+
+
+
+
 
 #https://github.com/streamlit/streamlit/issues/400
 # get download link
@@ -207,11 +213,14 @@ def get_table_download_link(df, **kwargs):
 def load_files(file_list):
     #file_list = glob.glob(os.path.join(output_dir, "*"))
     i=0
-    adata_list=[]
-    for file in file_list:
-        adata = sc.read_h5ad(file)
-        adata_list.append(adata)
-    adata_merge = anndata.concat(adata_list,index_unique=None)
+    for file_list_sub in chunked_file_list:
+        adata = load_files(file_list_sub)
+        if i == 0:
+            adata_merge = adata
+            i += 1
+        else:
+            adata_merge = anndata.concat(adata_merge,adata],index_unique=None)
+            i += 1
     print(adata_merge)
     return(adata_merge)
 
@@ -235,10 +244,10 @@ def load_h5ad_file(workingdir):
     for file_list_sub in chunked_file_list:
         adata = load_files(file_list_sub)
         if i == 0:
-            adata_merge = adata
+            st.session_state['adata_merge'] = adata
             i += 1
         else:
-            adata_merge = anndata.concat([adata_merge,adata],index_unique=None)
+            st.session_state['adata_merge'] = anndata.concat([st.session_state['adata_merge'],adata],index_unique=None)
             i += 1
         del(adata)
     ######
@@ -363,6 +372,7 @@ with tab1:
         tuple([str(leiden_idx) for leiden_idx in list(range(0,leiden_max))]),
         tuple([str(leiden_idx) for leiden_idx in list(range(0,leiden_max))])
     )
+    adata_merge = st.session_state['adata_merge'] 
     adata_merge_filtered = adata_merge[adata_merge.obs[adata_merge.obs.leiden.isin(sel_cluster)].index]
     sc.tl.dendrogram(adata_merge_filtered,groupby="leiden")
     if method == "tSNE":
