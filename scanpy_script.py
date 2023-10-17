@@ -215,13 +215,12 @@ def load_files(file_list):
             adata_merge = adata_merge.concatenate(adata,index_unique=None)
             i += 1
         del(adata)
+        print(adata_merge)
     return(adata_merge)
 
 def chunk_array(arr, chunk_size):
     for i in range(0, len(arr), chunk_size):
         yield arr[i:i + chunk_size]
-        
- 
 
 
 # Return GBM treatment data as a data frame.
@@ -233,7 +232,7 @@ def load_h5ad_file(workingdir):
     ### load the chunked ###
     output_dir = 'input/'+workingdir+'/scanpy_adata_merge_15249_unregress/'
     file_list = glob.glob(os.path.join(output_dir, "*"))
-    chunk_size = 5
+    chunk_size = 3
     chunked_file_list = list(chunk_array(file_list, chunk_size))
     i=0
     for file_list_sub in chunked_file_list:
