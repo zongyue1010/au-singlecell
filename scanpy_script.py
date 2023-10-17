@@ -843,7 +843,7 @@ with tab5:
             return_value = agraph(nodes=nodes, 
                           edges=edges, 
                           config=config)
-            #agraph(list(idx2symbol.values()), (PPI), config)
+            agraph(list(idx2symbol.values()), (PPI), config)
             st.markdown(get_table_download_link(pd.DataFrame(PPI), fileName = ' '+fileName+' '+str(PAGid)+' data for interactions'), unsafe_allow_html=True)
             st.markdown(get_table_download_link(pd.DataFrame(DataE), fileName = ' '+fileName+' '+str(PAGid)+' data for gene expressions'), unsafe_allow_html=True)
         else:
