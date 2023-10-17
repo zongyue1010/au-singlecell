@@ -216,14 +216,13 @@ def load_files(file_list):
     for file in file_list:
         adata = sc.read_h5ad(file)
         if i == 0:
-            adata_merge = adata
+            st.session_state['adata_merge'] = adata
             i += 1
         else:
-            adata_merge = anndata.concat([adata_merge,adata],index_unique=None)
+            st.session_state['adata_merge'] = anndata.concat([st.session_state['adata_merge'],adata],index_unique=None)
             i += 1
         del(adata)
     print(adata_merge)
-    return(adata_merge)
 
 def chunk_array(arr, chunk_size):
     for i in range(0, len(arr), chunk_size):
@@ -239,18 +238,8 @@ def load_h5ad_file(workingdir):
     ### load the chunked ###
     output_dir = 'input/'+workingdir+'/scanpy_adata_merge_15249_unregress/'
     file_list = glob.glob(os.path.join(output_dir, "*"))
-    chunk_size = 3
-    chunked_file_list = list(chunk_array(file_list, chunk_size))
-    i=0
-    for file_list_sub in chunked_file_list:
-        adata = load_files(file_list_sub)
-        if i == 0:
-            st.session_state['adata_merge'] = adata
-            i += 1
-        else:
-            st.session_state['adata_merge'] = anndata.concat([st.session_state['adata_merge'],adata],index_unique=None)
-            i += 1
-        del(adata)
+    load_files(file_list)
+
     ######
     description = pd.read_csv('input/'+workingdir+'/'+'description.txt',sep="\t")
     cellpop = pd.read_csv('input/'+workingdir+'/'+'cellpop.txt',sep="\t")
