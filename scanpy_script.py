@@ -212,15 +212,11 @@ def get_table_download_link(df, **kwargs):
 
 def load_files(file_list):
     #file_list = glob.glob(os.path.join(output_dir, "*"))
-    i=0
-    for file_list_sub in chunked_file_list:
-        adata = load_files(file_list_sub)
-        if i == 0:
-            adata_merge = adata
-            i += 1
-        else:
-            adata_merge = anndata.concat([adata_merge,adata],index_unique=None)
-            i += 1
+    adata_list=[]
+    for file in file_list:
+        adata = sc.read_h5ad(file)
+        adata_list.append(adata)
+    adata_merge = anndata.concat(adata_list,index_unique=None)
     print(adata_merge)
     return(adata_merge)
 
@@ -372,7 +368,6 @@ with tab1:
         tuple([str(leiden_idx) for leiden_idx in list(range(0,leiden_max))]),
         tuple([str(leiden_idx) for leiden_idx in list(range(0,leiden_max))])
     )
-    adata_merge = st.session_state['adata_merge'] 
     adata_merge_filtered = adata_merge[adata_merge.obs[adata_merge.obs.leiden.isin(sel_cluster)].index]
     sc.tl.dendrogram(adata_merge_filtered,groupby="leiden")
     if method == "tSNE":
