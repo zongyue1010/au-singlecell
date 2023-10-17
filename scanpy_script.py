@@ -16,6 +16,7 @@ import plotly
 import math
 import scanpy as sc
 import glob
+import anndata
 
 ### multiple tabs load style ###
 ### ref: https://github.com/streamlit/streamlit/issues/233 ###
@@ -212,7 +213,7 @@ def load_files(file_list):
             adata_merge = adata
             i += 1
         else:
-            adata_merge = adata_merge.concatenate(adata,index_unique=None)
+            adata_merge = anndata.concat([adata_merge,adata],index_unique=None)
             i += 1
         del(adata)
         print(adata_merge)
@@ -241,7 +242,7 @@ def load_h5ad_file(workingdir):
             adata_merge = adata
             i += 1
         else:
-            adata_merge = adata_merge.concatenate(adata,index_unique=None)
+            adata_merge = anndata.concat([adata_merge,adata],index_unique=None)
             i += 1
         del(adata)
     ######
