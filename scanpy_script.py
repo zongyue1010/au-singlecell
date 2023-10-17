@@ -476,6 +476,7 @@ with tab3:
     
     cluster_name = 'leiden'
     method_name = 'wilcoxon'
+    sc.tl.rank_genes_groups(adata_merge, 'leiden', groups=['1'], reference='0', method='wilcoxon',key_added = "wilcoxon")
     if data_btn == True or (str(selected_cluster) in pd.DataFrame(adata_merge_filtered.uns[method_name]['names']).keys()):
         if((str(selected_cluster) in pd.DataFrame(adata_merge_filtered.uns[method_name]['names']).keys())):
             print("passed")
