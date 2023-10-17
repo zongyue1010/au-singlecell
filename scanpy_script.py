@@ -243,7 +243,7 @@ def load_h5ad_file(workingdir):
     ######
     description = pd.read_csv('input/'+workingdir+'/'+'description.txt',sep="\t")
     cellpop = pd.read_csv('input/'+workingdir+'/'+'cellpop.txt',sep="\t")
-    return(adata_merge,description,cellpop)
+    return(description,cellpop)
 
 # Call PAGER REST API to perform hypergeometric test and return enriched PAGs associated with given list of genes as a data frame.
 # See pathFun() in PAGER R SDK at https://uab.app.box.com/file/529139337869.
@@ -301,7 +301,7 @@ def run_force_layout(G):
 #st.write(clinical_data)
 
 ###############
-adata_merge,description,cellpop = load_h5ad_file(workingdir)
+description,cellpop = load_h5ad_file(workingdir)
 
 
 ### multiple tab show tabs ###
