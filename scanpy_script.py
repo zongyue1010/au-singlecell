@@ -459,7 +459,8 @@ def marker_filter(res_pd,user_score_min, user_score_max,user_lf_min, user_lf_max
     res_pd_filter = res_pd_filter.reset_index(drop=True)
     return(res_pd_filter)
 
-res_pd_filter=pd.DataFrame()
+if 'res_pd_filter' not in st.session_state.keys():
+    res_pd_filter=pd.DataFrame()
 with tab3:
     st.header('Section 3: Select cluster to perform differentially expressed gene analysis')
     selected_cluster = st.selectbox('Selected cluster',
@@ -515,7 +516,7 @@ with tab3:
             st.subheader(fileName+" differetially expressed genes sorted by scores (-log(p-value)*Fold Change).")
             st.write(res_pd_filter)
             st.markdown(get_table_download_link(pd.DataFrame(res_pd_filter), fileName = fileName+'_DEG list result'), unsafe_allow_html=True)
-
+            st.session_state['res_pd_filter'] = res_pd_filter
 
 #sampleNames=[]
 #for i in range(0,len(degs)):
@@ -541,7 +542,7 @@ with tab4:
     ########
     st.header('Section 4: Perform PAGER Analysis')
     st.markdown("The list of significantly differentially expressed genes (DEG) is then passed to Pathways, Annotated gene lists, and Gene signatures Electronic Repository (PAGER), which offers a network-accessible REST API for performing various gene-set, network, and pathway analyses.")
-    if res_pd_filter.shape[0]!=0:
+    if st.session_state['res_pd_filter'].shape[0]!=0:
         st.sidebar.subheader('Adjust PAGER Parameters')
         link = 'The PAGER database detail [http://discovery.informatics.uab.edu/PAGER/](http://discovery.informatics.uab.edu/PAGER/)'
         st.sidebar.markdown(link, unsafe_allow_html=True)
@@ -681,7 +682,7 @@ def PPIgeneration(geneInt,symbol2idx):
 
 with tab5:    
     st.header('Section 5: Generate the network of the selected PAG')
-    if res_pd_filter.shape[0]!=0:
+    if st.session_state['res_pd_filter'].shape[0]!=0:
         st.write('Select a PAG_ID here:')
         #st.write(pag_ids)
         PAGid = st.selectbox(
