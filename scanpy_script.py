@@ -679,7 +679,7 @@ def PPIgeneration(geneInt,symbol2idx):
 
 with tab5:    
     st.header('Section 5: Generate the network of the selected PAG')
-    if pag_ids:
+    if res_pd_filter:
         st.write('Select a PAG_ID here:')
         #st.write(pag_ids)
         PAGid = st.selectbox(
