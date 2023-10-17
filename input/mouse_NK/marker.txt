@@ -1,0 +1,5 @@
+Marker	Barcode	Biolegend product name
+CD11b (Itgam)	TGAAGGCTCATTTGT	TotalSeq™-B0014 anti-mouse/human CD11b Antibody
+CD27 (Cd27)	CAAGGTATGTCACTG	TotalSeq™-B0191 anti-mouse/rat/human CD27 Antibody
+NK1.1  (Klrb1c)	GTAACATTACTCGTC	TotalSeq™-B0118 anti-mouse NK-1.1 Antibody
+CD122 (Il2rb)	GGTATGCGACACTTA	TotalSeq™-B0227 anti-mouse CD122 (IL-2Rβ) Antibody

@@ -1,0 +1,4 @@
+Sample	InputGenes	InputSamples	RemainingGenes	RemainingSamples	status
+bone marrow	32285	17092	16336	17035	passed
+spleen	32285	13831	16343	13779	passed
+blood	32285	13435	15921	13387	passed

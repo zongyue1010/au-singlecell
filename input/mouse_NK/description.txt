@@ -1,0 +1,4 @@
+Sample	Description	Barcode	Biolegend product name
+bone marrow	Bone marrow cells from mouse identified by antibody ID Hashtag 1	ACCCACCAGTAAGAC	TotalSeq™-B0301 anti-mouse Hashtag 2 Antibody
+spleen	Spleen cells from mouse identified by  antibody ID Hashtag 2	GGTCGAGAGCATTCA	TotalSeq™-B0302 anti-mouse Hashtag 2 Antibody
+blood	Blood cells from mouse identified by antibody ID Hashtag 3	CTTGCCGCATGTCAT	TotalSeq™-B0303 anti-mouse Hashtag 2 Antibody
