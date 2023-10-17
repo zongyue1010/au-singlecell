@@ -540,79 +540,79 @@ with tab4:
     ########
     st.header('Section 4: Perform PAGER Analysis')
     st.markdown("The list of significantly differentially expressed genes (DEG) is then passed to Pathways, Annotated gene lists, and Gene signatures Electronic Repository (PAGER), which offers a network-accessible REST API for performing various gene-set, network, and pathway analyses.")
-    
-    st.sidebar.subheader('Adjust PAGER Parameters')
-    link = 'The PAGER database detail [http://discovery.informatics.uab.edu/PAGER/](http://discovery.informatics.uab.edu/PAGER/)'
-    st.sidebar.markdown(link, unsafe_allow_html=True)
-    sources = st.sidebar.multiselect('Available Data Sources',
-        ("WikiPathway_2021_HUMAN","Reactome_2021","KEGG_2021","Spike","BioCarta","NCI-Nature Curated","GeoMx Cancer Transcriptome Atlas","Microcosm Targets","TargetScan","mirTARbase","NGS Catalog","GTEx","HPA-TCGA","HPA-PathologyAtlas","HPA-GTEx","HPA-FANTOM5","HPA-normRNA","HPA-RNAcon","GOA","I2D","Cell","HPA-CellAtlas","CellMarker","GAD","GWAS Catalog","PheWAS","MSigDB","GeneSigDB","PharmGKB","DSigDB","Genome Data","Protein Lounge","Pfam","Isozyme","HPA-normProtein"),
-        ("WikiPathway_2021_HUMAN","Reactome_2021","KEGG_2021","Spike","BioCarta","NCI-Nature Curated")
-    )
-    
-    
-    olap = st.sidebar.text_input("Overlap ≥", 1)
-    sim = st.sidebar.slider('Similarity score ≥', 0.0, 1.0, 0.05, 0.01)
-    fdr = st.sidebar.slider('-log2-based FDR Cutoff', 0, 300, 3, 1)
-    fdr = np.power(2,-np.float64(fdr))
-    
-    # modified PAG enrichment
-    PAGERSet=pd.DataFrame()
-    deg_names=[]
-    pag_ids=[]
-    pags=[]
-    PAG_val=dict()
-    # Remove nan from gene list.
-    
-    ## simple upper case in transforming homologous gene symbol from mouse to human
-    #res_pd_filter['human_symbol'] = [x.upper() for x in res_pd_filter['names'].values.tolist() if str(x) != 'nan']
-    # homolog
-    homologene = pd.read_csv('homologene'+'/'+'homologene_builld68.data.txt',
-                             sep="\t",header=None)
-    homocolnames = ["homologene","tax_id","gene_id","symbol","ensembl","protein"]
-    homologene.columns = homocolnames
-    human_gene = homologene[(homologene['tax_id'] == 9606)]
-    mouse_gene = homologene[(homologene['tax_id'] == 10090)]
-    human_mouse = human_gene.merge(mouse_gene,left_on='homologene', right_on='homologene', how='outer')
-    mouse_human_map = human_mouse[human_mouse['symbol_y'].isin(res_pd_filter['names'])]
-    mouse_human_gene = mouse_human_map[['symbol_x','symbol_y']]
-    mouse_human_gene = mouse_human_gene.rename(columns={'symbol_x':'human','symbol_y':'mouse_symbol'})
-    res_pd_filter = res_pd_filter.merge(mouse_human_gene,left_on="names",right_on="mouse_symbol")
-    genes = res_pd_filter['human'][~res_pd_filter['human'].isna()].unique()
-    
-    
-    #st.write(genes)
-    #pager_run_state = st.text('Calling PAGER REST API ... ')
-    if len(genes) != 0:
-        pager_output = run_pager(genes, sources, olap, sim, fdr)
-        #pager_run_state.text('Calling PAGER REST API ... done!')
-        #st.write(pager_output)
-        st.subheader('View/Filter Results')
-        # Convert GS_SIZE column from object to integer dtype.
-        # See https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.astype.html.
-        pager_output = pager_output.astype({'GS_SIZE': 'int32'})
-        gs_sizes = pager_output['GS_SIZE'].tolist()
-        # Figure out the min and max GS_SIZE within the PAGER output.
-        min_gs_size = min(gs_sizes)
-        max_gs_size = max(gs_sizes)
-        # Set up a range slider. Cool!
-        # See https://streamlit.io/docs/api.html#streamlit.slider.
-        user_min, user_max = st.slider('GS_SIZE Range', max_value=max_gs_size, value=(min_gs_size, max_gs_size))
-        filtered_output = pager_output[pager_output['GS_SIZE'].between(user_min, user_max)]
-        filtered_output = filtered_output.sort_values(['pFDR'],ascending=True)
-        filtered_output = filtered_output.reset_index(drop=True)
-        st.subheader(fileName+" enriched PAG sorted by p-value False Discovery Rate (FDR).")    
-        st.write(filtered_output)            
-        if(len(filtered_output.index)>0):
-            for row in filtered_output.iloc[:,[0,1,-1]].values:
-                pag_id=str(row[0])+"_"+str(row[1])
-                pags.append(pag_id)
-                pag_ids=pag_ids+[pag_id]
-                val=-np.log(row[2])/np.log(10)
-                PAG_val[pag_id]=val
-        filtered_output['SAMPLE'] = "c"+str(selected_cluster)
-        PAGERSet = PAGERSet.append(filtered_output)
-        st.markdown(get_table_download_link(filtered_output, fileName = fileName +' geneset enrichment result'), unsafe_allow_html=True)
-    PAGERSet = pd.DataFrame(PAGERSet)
+    if res_pd_filter:
+        st.sidebar.subheader('Adjust PAGER Parameters')
+        link = 'The PAGER database detail [http://discovery.informatics.uab.edu/PAGER/](http://discovery.informatics.uab.edu/PAGER/)'
+        st.sidebar.markdown(link, unsafe_allow_html=True)
+        sources = st.sidebar.multiselect('Available Data Sources',
+            ("WikiPathway_2021_HUMAN","Reactome_2021","KEGG_2021","Spike","BioCarta","NCI-Nature Curated","GeoMx Cancer Transcriptome Atlas","Microcosm Targets","TargetScan","mirTARbase","NGS Catalog","GTEx","HPA-TCGA","HPA-PathologyAtlas","HPA-GTEx","HPA-FANTOM5","HPA-normRNA","HPA-RNAcon","GOA","I2D","Cell","HPA-CellAtlas","CellMarker","GAD","GWAS Catalog","PheWAS","MSigDB","GeneSigDB","PharmGKB","DSigDB","Genome Data","Protein Lounge","Pfam","Isozyme","HPA-normProtein"),
+            ("WikiPathway_2021_HUMAN","Reactome_2021","KEGG_2021","Spike","BioCarta","NCI-Nature Curated")
+        )
+        
+        
+        olap = st.sidebar.text_input("Overlap ≥", 1)
+        sim = st.sidebar.slider('Similarity score ≥', 0.0, 1.0, 0.05, 0.01)
+        fdr = st.sidebar.slider('-log2-based FDR Cutoff', 0, 300, 3, 1)
+        fdr = np.power(2,-np.float64(fdr))
+        
+        # modified PAG enrichment
+        PAGERSet=pd.DataFrame()
+        deg_names=[]
+        pag_ids=[]
+        pags=[]
+        PAG_val=dict()
+        # Remove nan from gene list.
+        
+        ## simple upper case in transforming homologous gene symbol from mouse to human
+        #res_pd_filter['human_symbol'] = [x.upper() for x in res_pd_filter['names'].values.tolist() if str(x) != 'nan']
+        # homolog
+        homologene = pd.read_csv('homologene'+'/'+'homologene_builld68.data.txt',
+                                 sep="\t",header=None)
+        homocolnames = ["homologene","tax_id","gene_id","symbol","ensembl","protein"]
+        homologene.columns = homocolnames
+        human_gene = homologene[(homologene['tax_id'] == 9606)]
+        mouse_gene = homologene[(homologene['tax_id'] == 10090)]
+        human_mouse = human_gene.merge(mouse_gene,left_on='homologene', right_on='homologene', how='outer')
+        mouse_human_map = human_mouse[human_mouse['symbol_y'].isin(res_pd_filter['names'])]
+        mouse_human_gene = mouse_human_map[['symbol_x','symbol_y']]
+        mouse_human_gene = mouse_human_gene.rename(columns={'symbol_x':'human','symbol_y':'mouse_symbol'})
+        res_pd_filter = res_pd_filter.merge(mouse_human_gene,left_on="names",right_on="mouse_symbol")
+        genes = res_pd_filter['human'][~res_pd_filter['human'].isna()].unique()
+        
+        
+        #st.write(genes)
+        #pager_run_state = st.text('Calling PAGER REST API ... ')
+        if len(genes) != 0:
+            pager_output = run_pager(genes, sources, olap, sim, fdr)
+            #pager_run_state.text('Calling PAGER REST API ... done!')
+            #st.write(pager_output)
+            st.subheader('View/Filter Results')
+            # Convert GS_SIZE column from object to integer dtype.
+            # See https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.astype.html.
+            pager_output = pager_output.astype({'GS_SIZE': 'int32'})
+            gs_sizes = pager_output['GS_SIZE'].tolist()
+            # Figure out the min and max GS_SIZE within the PAGER output.
+            min_gs_size = min(gs_sizes)
+            max_gs_size = max(gs_sizes)
+            # Set up a range slider. Cool!
+            # See https://streamlit.io/docs/api.html#streamlit.slider.
+            user_min, user_max = st.slider('GS_SIZE Range', max_value=max_gs_size, value=(min_gs_size, max_gs_size))
+            filtered_output = pager_output[pager_output['GS_SIZE'].between(user_min, user_max)]
+            filtered_output = filtered_output.sort_values(['pFDR'],ascending=True)
+            filtered_output = filtered_output.reset_index(drop=True)
+            st.subheader(fileName+" enriched PAG sorted by p-value False Discovery Rate (FDR).")    
+            st.write(filtered_output)            
+            if(len(filtered_output.index)>0):
+                for row in filtered_output.iloc[:,[0,1,-1]].values:
+                    pag_id=str(row[0])+"_"+str(row[1])
+                    pags.append(pag_id)
+                    pag_ids=pag_ids+[pag_id]
+                    val=-np.log(row[2])/np.log(10)
+                    PAG_val[pag_id]=val
+            filtered_output['SAMPLE'] = "c"+str(selected_cluster)
+            PAGERSet = PAGERSet.append(filtered_output)
+            st.markdown(get_table_download_link(filtered_output, fileName = fileName +' geneset enrichment result'), unsafe_allow_html=True)
+        PAGERSet = pd.DataFrame(PAGERSet)
 
 
 ##st.write(PAGERSet.shape[1])
@@ -679,171 +679,172 @@ def PPIgeneration(geneInt,symbol2idx):
 
 with tab5:    
     st.header('Section 5: Generate the network of the selected PAG')
-    st.write('Select a PAG_ID here:')
-    #st.write(pag_ids)
-    PAGid = st.selectbox(
-        'Available PAG_IDs',
-        tuple(pag_ids),
-        key = "PAG_ID_box"
-        )
-    #st.write(PAGid)
-    
-    
-    ID_only = re.sub("([A-Z0-9]+)_[^_]*","\\1",str(PAGid))
-    link = "For the selected PAG "+ str(PAGid)+"'s gene information. (http://discovery.informatics.uab.edu/PAGER/index.php/geneset/view/"+ID_only+")"
-    st.markdown(link, unsafe_allow_html=True)
-    
-    
-    geneInt = run_pager_int(ID_only)
-    geneRanked = pag_ranked_gene(ID_only)
-    #st.write(geneRanked)
-    
-    idx2symbol = dict()
-    symbol2idx = dict()
-    symbol2size = dict()
-    idx=0
-    geneRanked['RP_SCORE'].fillna(0.1, inplace=True)
-    geneRanked['RP_SCORE'] = geneRanked['RP_SCORE'].astype(float)
-    geneRanked['node_size'] = geneRanked['RP_SCORE'] *4
-    st.write(geneRanked)
-    for gene_idx in range(0,geneRanked.shape[0]):
-        gene = geneRanked.iloc[gene_idx,]
-        #st.write(gene)
-        symbol2idx[gene['GENE_SYM']] = str(idx)
-        #st.write(gene['RP_SCORE'])
-        #symbol2size[gene['GENE_SYM']] = gene['RP_SCORE']
-        if(gene['RP_SCORE'] is not None):
-            symbol2size[gene['GENE_SYM']] = gene['node_size']
-        else:
-            symbol2size[gene['GENE_SYM']] = 1
-        idx2symbol[str(idx)] = gene['GENE_SYM']
-        idx+=1
-    
-    
-    (idxPair,PPI,idx2symbol) = PPIgeneration(geneInt,symbol2idx)
-    
-    
-    #st.write(PPI)
-    
-    # spring force layout in networkx
-    #import networkx as nx
-    #G=nx.Graph()
-    #G.add_nodes_from(idx2symbol.values())
-    #G.add_edges_from(PPI)
-    #pos=run_force_layout(G)
-    
-    
-    
-    #SampleNameButton = st.radio(
-    #     "selected sample",
-    #     sampleNames,key='network')
-    colorMap = dict()
-    
-    #if SampleNameButton in [i[0] for i in degs]:    
-        #idx=[i[0] for i in degs].index(SampleNameButton)
-    #for idx in orderIdx:     
-        #deg=degs[idx]
-        #sampleName=deg[0]
-    
-    config = Config(height=500, width=700, nodeHighlightBehavior=True, highlightColor="#F7A7A6", directed=False,
-          collapsible=True,              
-          node={'labelProperty':'label',"strokeColor": "black"},
-          #, link={'labelProperty': 'label', 'renderLabel': True}
-          link={'color': "#d3d3d3"},
-                    key="agraph_"+fileName
-       )
-    st.write("Sample:"+fileName)
-    #deg_results=deg[1]
-    deg_results = res_pd_filter
-    genesExp = [x for x in deg_results[['human','logfoldchanges']].values.tolist()] # if str(x[0]) != 'nan'
-    #st.write(np.array(genesExp)[:,-1])
-    # expression data in network
-    expInNetwork=np.array(genesExp)[np.logical_or.reduce([np.array(genesExp)[:,0] == x for x in idx2symbol.values()])].tolist()
-    
-    # show expression table
-    st.write("Gene expression within the selected PAG:")
-    expInNetworkArr = np.array(expInNetwork)
-    expInNetworkArrSorted = np.array(sorted(expInNetworkArr,key = lambda expInNetworkArr:np.float64(expInNetworkArr[1]), reverse=True))
-    DataE=pd.DataFrame(expInNetworkArrSorted)
-    DataE.rename(columns={0:'symbol',1:'log2FC'},inplace=True)
-    st.write(DataE)
-    
-    ### show expression figure ###
-    marker_genes = res_pd_filter[res_pd_filter.human.isin(DataE.symbol.values)].mouse_symbol
-    option = st.selectbox(
-         'Type of gene expression\'s figure',
-         ('dotplot', 'violin','matrix'))
-    st.write('You selected:', option)
-    sc.tl.dendrogram(adata_merge_filtered,groupby="leiden")
-    if option == 'dotplot':      
-        dp = sc.pl.dotplot(adata_merge_filtered, marker_genes.values, groupby='leiden', return_fig=True,categories_order=sel_cluster)
-        st.pyplot(dp.add_totals().style(dot_edge_color='black', dot_edge_lw=0.5, cmap='viridis').show())
-    elif option == 'heatmap':
-        sc.tl.dendrogram(adata_merge_filtered,groupby="leiden")
-        st.pyplot(sc.pl.heatmap(adata_merge_filtered, marker_genes.values, groupby='leiden', swap_axes=True,cmap="viridis"))
-    elif option == 'violin':
-        st.pyplot(sc.pl.stacked_violin(adata_merge_filtered, marker_genes.values, groupby='leiden',cmap="viridis",categories_order=sel_cluster))
-    elif option == 'matrix':   
-        st.pyplot(sc.pl.matrixplot(adata_merge_filtered, marker_genes.values, groupby='leiden',cmap="viridis",categories_order=sel_cluster))
-    
-    
-    
-    if np.size(np.array(expInNetwork))>0:
-        zeroInNetwork=[[i,'0'] for i in idx2symbol.values() if i not in np.array(expInNetwork)[:,0]]
-    else:
-        zeroInNetwork=[[i,'0'] for i in idx2symbol.values()]
-    for i in zeroInNetwork:
-        expInNetwork.append(i)
-        
-    
-    
-    # And a data frame with characteristics for your nodes in networkx
-    carac = pd.DataFrame({'ID':np.array(expInNetwork)[:,0], 
-                          'myvalue':[np.float64(i) for i in np.array(expInNetwork)[:,1]] })
-    
-    # Plot it, providing a continuous color scale with cmap:
-    # Here is the tricky part: I need to reorder carac, to assign the good color to each node
-    carac = carac.set_index('ID')
-    #carac = carac.reindex(G.nodes())
-    # load network function 
-    #X = Network.generateNetwork(carac,pos,PPI)
-    #st.pyplot(plt,caption=sampleName)
-    #image = Image.open('./network.png')
-    #st.image(image, caption=sampleName,
-    #     use_column_width=True)
-    #st.write(X.nodes)
-    #st.write(X.edges)
-    #st.write(carac.to_dict()["myvalue"])
-    
-    #st.write(newcmp)
-    st.subheader(fileName+" enriched "+str(PAGid)+"'s gene network")  
-    max_val = max([np.abs(val) for val in carac.to_dict()["myvalue"].values()])
-    
-    #st.write(max_val)
-    if max_val != float(0):
-        nodes = [] 
-        for i in idx2symbol.values():             
-            #carac.to_dict()["myvalue"][str(i)]
-            nodes.append(Node(
-                id=i, 
-                label=str(i), 
-                size=symbol2size[str(i)],#400,                            
-                color=hex_map[int( carac.to_dict()["myvalue"][i]/max_val*colorUnit)+colorUnit]
+    if pag_ids:
+        st.write('Select a PAG_ID here:')
+        #st.write(pag_ids)
+        PAGid = st.selectbox(
+            'Available PAG_IDs',
+            tuple(pag_ids),
+            key = "PAG_ID_box"
             )
-            ) # includes **kwargs
-        #edges = [Edge(source=i, label="int", target=j,color="#d3d3d3") for (i,j) in X.edges] # includes **kwargs  type="CURVE_SMOOTH"
-        edges = [Edge(source=pair[0], label="int", target=pair[1],color="#d3d3d3") for pair in PPI]
+        #st.write(PAGid)
         
-        return_value = agraph(nodes=nodes, 
-                      edges=edges, 
-                      config=config)
-        #agraph(list(idx2symbol.values()), (PPI), config)
-        st.markdown(get_table_download_link(pd.DataFrame(PPI), fileName = ' '+fileName+' '+str(PAGid)+' data for interactions'), unsafe_allow_html=True)
-        st.markdown(get_table_download_link(pd.DataFrame(DataE), fileName = ' '+fileName+' '+str(PAGid)+' data for gene expressions'), unsafe_allow_html=True)
-    else:
-        st.write("No expression.")
-    #except:
-    #    st.write("You select nothing.")
+        
+        ID_only = re.sub("([A-Z0-9]+)_[^_]*","\\1",str(PAGid))
+        link = "For the selected PAG "+ str(PAGid)+"'s gene information. (http://discovery.informatics.uab.edu/PAGER/index.php/geneset/view/"+ID_only+")"
+        st.markdown(link, unsafe_allow_html=True)
+        
+        
+        geneInt = run_pager_int(ID_only)
+        geneRanked = pag_ranked_gene(ID_only)
+        #st.write(geneRanked)
+        
+        idx2symbol = dict()
+        symbol2idx = dict()
+        symbol2size = dict()
+        idx=0
+        geneRanked['RP_SCORE'].fillna(0.1, inplace=True)
+        geneRanked['RP_SCORE'] = geneRanked['RP_SCORE'].astype(float)
+        geneRanked['node_size'] = geneRanked['RP_SCORE'] *4
+        st.write(geneRanked)
+        for gene_idx in range(0,geneRanked.shape[0]):
+            gene = geneRanked.iloc[gene_idx,]
+            #st.write(gene)
+            symbol2idx[gene['GENE_SYM']] = str(idx)
+            #st.write(gene['RP_SCORE'])
+            #symbol2size[gene['GENE_SYM']] = gene['RP_SCORE']
+            if(gene['RP_SCORE'] is not None):
+                symbol2size[gene['GENE_SYM']] = gene['node_size']
+            else:
+                symbol2size[gene['GENE_SYM']] = 1
+            idx2symbol[str(idx)] = gene['GENE_SYM']
+            idx+=1
+        
+        
+        (idxPair,PPI,idx2symbol) = PPIgeneration(geneInt,symbol2idx)
+        
+        
+        #st.write(PPI)
+        
+        # spring force layout in networkx
+        #import networkx as nx
+        #G=nx.Graph()
+        #G.add_nodes_from(idx2symbol.values())
+        #G.add_edges_from(PPI)
+        #pos=run_force_layout(G)
+        
+        
+        
+        #SampleNameButton = st.radio(
+        #     "selected sample",
+        #     sampleNames,key='network')
+        colorMap = dict()
+        
+        #if SampleNameButton in [i[0] for i in degs]:    
+            #idx=[i[0] for i in degs].index(SampleNameButton)
+        #for idx in orderIdx:     
+            #deg=degs[idx]
+            #sampleName=deg[0]
+        
+        config = Config(height=500, width=700, nodeHighlightBehavior=True, highlightColor="#F7A7A6", directed=False,
+              collapsible=True,              
+              node={'labelProperty':'label',"strokeColor": "black"},
+              #, link={'labelProperty': 'label', 'renderLabel': True}
+              link={'color': "#d3d3d3"},
+                        key="agraph_"+fileName
+           )
+        st.write("Sample:"+fileName)
+        #deg_results=deg[1]
+        deg_results = res_pd_filter
+        genesExp = [x for x in deg_results[['human','logfoldchanges']].values.tolist()] # if str(x[0]) != 'nan'
+        #st.write(np.array(genesExp)[:,-1])
+        # expression data in network
+        expInNetwork=np.array(genesExp)[np.logical_or.reduce([np.array(genesExp)[:,0] == x for x in idx2symbol.values()])].tolist()
+        
+        # show expression table
+        st.write("Gene expression within the selected PAG:")
+        expInNetworkArr = np.array(expInNetwork)
+        expInNetworkArrSorted = np.array(sorted(expInNetworkArr,key = lambda expInNetworkArr:np.float64(expInNetworkArr[1]), reverse=True))
+        DataE=pd.DataFrame(expInNetworkArrSorted)
+        DataE.rename(columns={0:'symbol',1:'log2FC'},inplace=True)
+        st.write(DataE)
+        
+        ### show expression figure ###
+        marker_genes = res_pd_filter[res_pd_filter.human.isin(DataE.symbol.values)].mouse_symbol
+        option = st.selectbox(
+             'Type of gene expression\'s figure',
+             ('dotplot', 'violin','matrix'))
+        st.write('You selected:', option)
+        sc.tl.dendrogram(adata_merge_filtered,groupby="leiden")
+        if option == 'dotplot':      
+            dp = sc.pl.dotplot(adata_merge_filtered, marker_genes.values, groupby='leiden', return_fig=True,categories_order=sel_cluster)
+            st.pyplot(dp.add_totals().style(dot_edge_color='black', dot_edge_lw=0.5, cmap='viridis').show())
+        elif option == 'heatmap':
+            sc.tl.dendrogram(adata_merge_filtered,groupby="leiden")
+            st.pyplot(sc.pl.heatmap(adata_merge_filtered, marker_genes.values, groupby='leiden', swap_axes=True,cmap="viridis"))
+        elif option == 'violin':
+            st.pyplot(sc.pl.stacked_violin(adata_merge_filtered, marker_genes.values, groupby='leiden',cmap="viridis",categories_order=sel_cluster))
+        elif option == 'matrix':   
+            st.pyplot(sc.pl.matrixplot(adata_merge_filtered, marker_genes.values, groupby='leiden',cmap="viridis",categories_order=sel_cluster))
+        
+        
+        
+        if np.size(np.array(expInNetwork))>0:
+            zeroInNetwork=[[i,'0'] for i in idx2symbol.values() if i not in np.array(expInNetwork)[:,0]]
+        else:
+            zeroInNetwork=[[i,'0'] for i in idx2symbol.values()]
+        for i in zeroInNetwork:
+            expInNetwork.append(i)
+            
+        
+        
+        # And a data frame with characteristics for your nodes in networkx
+        carac = pd.DataFrame({'ID':np.array(expInNetwork)[:,0], 
+                              'myvalue':[np.float64(i) for i in np.array(expInNetwork)[:,1]] })
+        
+        # Plot it, providing a continuous color scale with cmap:
+        # Here is the tricky part: I need to reorder carac, to assign the good color to each node
+        carac = carac.set_index('ID')
+        #carac = carac.reindex(G.nodes())
+        # load network function 
+        #X = Network.generateNetwork(carac,pos,PPI)
+        #st.pyplot(plt,caption=sampleName)
+        #image = Image.open('./network.png')
+        #st.image(image, caption=sampleName,
+        #     use_column_width=True)
+        #st.write(X.nodes)
+        #st.write(X.edges)
+        #st.write(carac.to_dict()["myvalue"])
+        
+        #st.write(newcmp)
+        st.subheader(fileName+" enriched "+str(PAGid)+"'s gene network")  
+        max_val = max([np.abs(val) for val in carac.to_dict()["myvalue"].values()])
+        
+        #st.write(max_val)
+        if max_val != float(0):
+            nodes = [] 
+            for i in idx2symbol.values():             
+                #carac.to_dict()["myvalue"][str(i)]
+                nodes.append(Node(
+                    id=i, 
+                    label=str(i), 
+                    size=symbol2size[str(i)],#400,                            
+                    color=hex_map[int( carac.to_dict()["myvalue"][i]/max_val*colorUnit)+colorUnit]
+                )
+                ) # includes **kwargs
+            #edges = [Edge(source=i, label="int", target=j,color="#d3d3d3") for (i,j) in X.edges] # includes **kwargs  type="CURVE_SMOOTH"
+            edges = [Edge(source=pair[0], label="int", target=pair[1],color="#d3d3d3") for pair in PPI]
+            
+            return_value = agraph(nodes=nodes, 
+                          edges=edges, 
+                          config=config)
+            #agraph(list(idx2symbol.values()), (PPI), config)
+            st.markdown(get_table_download_link(pd.DataFrame(PPI), fileName = ' '+fileName+' '+str(PAGid)+' data for interactions'), unsafe_allow_html=True)
+            st.markdown(get_table_download_link(pd.DataFrame(DataE), fileName = ' '+fileName+' '+str(PAGid)+' data for gene expressions'), unsafe_allow_html=True)
+        else:
+            st.write("No expression.")
+        #except:
+        #    st.write("You select nothing.")
 
 
 
