@@ -21,3 +21,4 @@ numpy
 jinja2
 umap-learn
 openpyxl
+scanpy
