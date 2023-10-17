@@ -432,7 +432,7 @@ with tab2:
     
 ###############
 # return the cluster comparison using the differeially expressed gene analysis 
-@st.cache(allow_output_mutation=True)
+
 def compute_DEG(cluster_name,selected_cluster,referece_cluster):
     sc.tl.rank_genes_groups(adata_merge_filtered, cluster_name, groups=[str(selected_cluster)],reference=str(referece_cluster),
                             method='wilcoxon',key_added = "wilcoxon")
