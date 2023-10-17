@@ -222,7 +222,7 @@ def load_files(file_list):
             st.session_state['adata_merge'] = anndata.concat([st.session_state['adata_merge'],adata],index_unique=None)
             i += 1
         del(adata)
-        
+        print(i)
 
 def chunk_array(arr, chunk_size):
     for i in range(0, len(arr), chunk_size):
@@ -238,7 +238,7 @@ def load_h5ad_file(workingdir):
     ### load the chunked ###
     output_dir = 'input/'+workingdir+'/scanpy_adata_merge_15249_unregress/'
     file_list = glob.glob(os.path.join(output_dir, "*"))
-    load_files(file_list)
+    load_files(file_list[0:4])
 
     ######
     description = pd.read_csv('input/'+workingdir+'/'+'description.txt',sep="\t")
