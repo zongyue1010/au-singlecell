@@ -222,7 +222,7 @@ def load_files(file_list):
             st.session_state['adata_merge'] = anndata.concat([st.session_state['adata_merge'],adata],index_unique=None)
             i += 1
         del(adata)
-        print(st.session_state['adata_merge'])
+        
 
 def chunk_array(arr, chunk_size):
     for i in range(0, len(arr), chunk_size):
