@@ -219,7 +219,7 @@ def load_files(file_list):
             adata_merge = adata
             i += 1
         else:
-            adata_merge = anndata.concat(adata_merge,adata],index_unique=None)
+            adata_merge = anndata.concat([adata_merge,adata],index_unique=None)
             i += 1
     print(adata_merge)
     return(adata_merge)
