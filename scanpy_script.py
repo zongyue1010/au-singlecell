@@ -364,6 +364,7 @@ with tab1:
         tuple([str(leiden_idx) for leiden_idx in list(range(0,leiden_max))])
     )
     adata_merge_filtered = adata_merge[adata_merge.obs[adata_merge.obs.leiden.isin(sel_cluster)].index]
+    st.session_state['adata_merge_filtered'] = adata_merge_filtered
     sc.tl.dendrogram(adata_merge_filtered,groupby="leiden")
     if method == "tSNE":
         #fig, axs = plt.subplots(1, 2, figsize=(8,4),constrained_layout=True)
@@ -435,7 +436,7 @@ with tab2:
 def compute_DEG(cluster_name,selected_cluster,referece_cluster):
     sc.tl.rank_genes_groups(adata_merge_filtered, cluster_name, groups=[str(selected_cluster)],reference=str(referece_cluster),
                             method='wilcoxon',key_added = "wilcoxon")
-
+    st.session_state['adata_merge_filtered'] = adata_merge_filtered
 @st.cache(allow_output_mutation=True)    
 def get_wilcoxon_result(adata_merge_filtered,selected_cluster):
     res_pd = pd.DataFrame()
@@ -484,14 +485,14 @@ with tab3:
     #        compute_DEG(cluster_name,selected_cluster,referece_cluster)
     if data_btn == True:
         compute_DEG(cluster_name,selected_cluster,referece_cluster)
-    elif method_name in adata_merge.uns:
-        if str(selected_cluster) in pd.DataFrame(adata_merge_filtered.uns[method_name]['names']).keys():
+    elif method_name in st.session_state['adata_merge_filtered'].uns:
+        if str(selected_cluster) in pd.DataFrame(st.session_state['adata_merge_filtered'].uns[method_name]['names']).keys():
             print("passed")
     else:
         st.write("Please click the \"Perform wilcoxon analysis\" botton for the data processing.")
         st.stop()
-    if method_name in adata_merge.uns:
-        if str(selected_cluster) in pd.DataFrame(adata_merge_filtered.uns[method_name]['names']).keys():        
+    if method_name in st.session_state['adata_merge_filtered'].uns:
+        if str(selected_cluster) in pd.DataFrame(st.session_state['adata_merge_filtered'].uns[method_name]['names']).keys():        
             res_pd = get_wilcoxon_result(adata_merge_filtered,selected_cluster)
             
             
