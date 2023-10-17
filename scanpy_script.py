@@ -322,7 +322,7 @@ description,cellpop = load_h5ad_file(workingdir)
 #st.markdown("<br>", unsafe_allow_html=True)
 #############
 data, tab1, tab2, tab3, tab4, tab5 = st.tabs(tabs)
-
+adata_merge = st.session_state['adata_merge']
 with data:
 #if active_tab == "Data":
     st.header('Dataset description')
@@ -345,6 +345,7 @@ with data:
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import numpy as np
+
 pct =  adata_merge.obs[['leiden','sample','n_genes']].groupby(['leiden','sample']).count()
 pct = pct.reset_index()  
 colors_custm = ['steelblue','darkorange','green']
