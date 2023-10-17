@@ -476,12 +476,13 @@ with tab3:
     
     cluster_name = 'leiden'
     method_name = 'wilcoxon'
-    sc.tl.rank_genes_groups(adata_merge, 'leiden', groups=['1'], reference='0', method='wilcoxon',key_added = "wilcoxon")
-    if data_btn == True or (str(selected_cluster) in pd.DataFrame(adata_merge_filtered.uns[method_name]['names']).keys()):
-        if((str(selected_cluster) in pd.DataFrame(adata_merge_filtered.uns[method_name]['names']).keys())):
-            print("passed")
-        else:
-            compute_DEG(cluster_name,selected_cluster,referece_cluster)
+    
+    #if data_btn == True or (str(selected_cluster) in pd.DataFrame(adata_merge_filtered.uns[method_name]['names']).keys()):
+    #    if((str(selected_cluster) in pd.DataFrame(adata_merge_filtered.uns[method_name]['names']).keys())):
+    #        print("passed")
+    #    else:
+    if data_btn == True:
+        compute_DEG(cluster_name,selected_cluster,referece_cluster)
     else:
         st.write("Please click the \"Perform wilcoxon analysis\" botton for the data processing.")
         st.stop()
