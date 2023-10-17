@@ -543,6 +543,7 @@ with tab4:
     st.header('Section 4: Perform PAGER Analysis')
     st.markdown("The list of significantly differentially expressed genes (DEG) is then passed to Pathways, Annotated gene lists, and Gene signatures Electronic Repository (PAGER), which offers a network-accessible REST API for performing various gene-set, network, and pathway analyses.")
     if st.session_state['res_pd_filter'].shape[0]!=0:
+        res_pd_filter = st.session_state['res_pd_filter']
         st.sidebar.subheader('Adjust PAGER Parameters')
         link = 'The PAGER database detail [http://discovery.informatics.uab.edu/PAGER/](http://discovery.informatics.uab.edu/PAGER/)'
         st.sidebar.markdown(link, unsafe_allow_html=True)
@@ -683,6 +684,7 @@ def PPIgeneration(geneInt,symbol2idx):
 with tab5:    
     st.header('Section 5: Generate the network of the selected PAG')
     if st.session_state['res_pd_filter'].shape[0]!=0:
+        res_pd_filter = st.session_state['res_pd_filter']
         st.write('Select a PAG_ID here:')
         #st.write(pag_ids)
         PAGid = st.selectbox(
