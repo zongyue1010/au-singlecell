@@ -485,9 +485,9 @@ with tab3:
     #        compute_DEG(cluster_name,selected_cluster,referece_cluster)
     if data_btn == True:
         compute_DEG(cluster_name,selected_cluster,referece_cluster)
-    elif method_name in st.session_state['adata_merge_filtered'].uns:
-        if str(selected_cluster) in pd.DataFrame(st.session_state['adata_merge_filtered'].uns[method_name]['names']).keys():
-            print("passed")
+    #elif method_name in st.session_state['adata_merge_filtered'].uns:
+    #    if str(selected_cluster) in pd.DataFrame(st.session_state['adata_merge_filtered'].uns[method_name]['names']).keys():
+    #        print("passed")
     else:
         st.write("Please click the \"Perform wilcoxon analysis\" botton for the data processing.")
         st.stop()
