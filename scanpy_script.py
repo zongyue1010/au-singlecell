@@ -460,7 +460,7 @@ def marker_filter(res_pd,user_score_min, user_score_max,user_lf_min, user_lf_max
     return(res_pd_filter)
 
 if 'res_pd_filter' not in st.session_state.keys():
-    res_pd_filter=pd.DataFrame()
+    st.session_state['res_pd_filter']=pd.DataFrame()
 with tab3:
     st.header('Section 3: Select cluster to perform differentially expressed gene analysis')
     selected_cluster = st.selectbox('Selected cluster',
