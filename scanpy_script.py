@@ -214,7 +214,7 @@ def load_h5ad_file(workingdir):
     ### load the chunked ###
     output_dir = 'input/'+workingdir+'/scanpy_adata_merge_15249_unregress/'
     file_list = glob.glob(os.path.join(output_dir, "*"))
-    st.session_state['adata_merge'] = load_files(file_list[0:4])
+    st.session_state['adata_merge'] = load_files(file_list[0:10])
     ######
     description = pd.read_csv('input/'+workingdir+'/'+'description.txt',sep="\t")
     cellpop = pd.read_csv('input/'+workingdir+'/'+'cellpop.txt',sep="\t")
@@ -462,9 +462,10 @@ with tab3:
         fileName = 'c'+str(st.session_state['selected_cluster'])+'_vs_'+'c'+str(st.session_state['referece_cluster'])
         st.session_state['fileName'] = fileName     
         compute_DEG(cluster_name,st.session_state['selected_cluster'],st.session_state['referece_cluster'])
-    elif 'adata_merge_filtered' not in st.session_state.keys():
-        st.write('run...!')
+    elif method_name not in st.session_state['adata_merge_filtered'].uns.keys():
         compute_DEG(cluster_name,st.session_state['selected_cluster'],st.session_state['referece_cluster'])
+    else:
+        print('')
     #else:
     #    compute_DEG(cluster_name,st.session_state['selected_cluster'],st.session_state['referece_cluster'])
         
