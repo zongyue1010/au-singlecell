@@ -456,6 +456,7 @@ with tab3:
         key="referece_box"
     )      
     button3 = st.button("Perform wilcoxon analysis!") # data_btn = st.button("Perform wilcoxon analysis")
+    
     if button3:
         st.session_state['selected_cluster'] = selected_cluster       
         st.session_state['referece_cluster'] = referece_cluster
@@ -463,6 +464,9 @@ with tab3:
         st.session_state['fileName'] = fileName     
         compute_DEG(cluster_name,st.session_state['selected_cluster'],st.session_state['referece_cluster'])
     elif method_name not in st.session_state['adata_merge_filtered'].uns.keys():
+        # initiate the parameters #
+        st.session_state['selected_cluster'] = int(sel_cluster[0]) if 'selected_cluster' not in st.session_state.keys() else st.session_state['selected_cluster']  
+        st.session_state['referece_cluster'] = 'rest' if 'referece_cluster' not in st.session_state.keys() else st.session_state['referece_cluster']        
         compute_DEG(cluster_name,st.session_state['selected_cluster'],st.session_state['referece_cluster'])
     else:
         print('')
