@@ -1,3 +1,4 @@
+### library ###
 import streamlit as st
 from streamlit_agraph import agraph, TripleStore, Config
 import pandas as pd
@@ -18,36 +19,22 @@ import scanpy as sc
 import glob
 import anndata
 
-### multiple tabs load style ###
-### ref: https://github.com/streamlit/streamlit/issues/233 ###
-
-#st.markdown(
-#    '<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">',
-#    unsafe_allow_html=True,
-#)
-#query_params = st.experimental_get_query_params()
-tabs = ["Data","Step1","Step2","Step3","Step4","Step5"]
-#if "tab" in query_params:
-#    active_tab = query_params["tab"][0]
-#else:
-#    active_tab = "Data"
-#
-#if active_tab not in tabs:
-#    st.experimental_set_query_params(tab="Data")
-#    active_tab = "Data"
-
-
+### coloring library ###
 # color mapping of the gene expression #
 from matplotlib import cm
 from matplotlib.colors import ListedColormap, LinearSegmentedColormap
 import scipy.spatial as sp, scipy.cluster.hierarchy as hc
 
+### seaborn library ###
 #http://seaborn.pydata.org/generated/seaborn.clustermap.html
 import seaborn as sns; sns.set(color_codes=True)
 from matplotlib import rcParams
 
+### multiple tabs load style ###
+### ref: https://github.com/streamlit/streamlit/issues/233 ###
 st.set_option('deprecation.showPyplotGlobalUse', False)
 
+### function ###
 def generateheatmap(mtx,deg_names,pag_ids,**kwargs):
     plt.figure(figsize=(5,5))
     # parameters in the heatmap setting 
@@ -79,7 +66,7 @@ def generateheatmap(mtx,deg_names,pag_ids,**kwargs):
     newcolors = np.vstack(
                             (
                                 #top(np.linspace(0, 1, 56)),
-                                ([[0,0,0,0.1]]),
+                                ([[0,0,0,1]]),
                                 bottom(np.linspace(0, 1, 56))
                             )
                          )
@@ -99,7 +86,6 @@ def generateheatmap(mtx,deg_names,pag_ids,**kwargs):
     expMtxsDF.columns = deg_names
     expMtxsDF.index = pag_ids
     #sns.set(font_scale=1,rc={'figure.figsize':(3,20)})
-    
     
     #print(rowCluster == True and int(deg_names.size) > 1)
 
@@ -143,7 +129,7 @@ def generateheatmap(mtx,deg_names,pag_ids,**kwargs):
     #for i, ax in enumerate(g.fig.axes):   ## getting all axes of the fig object
     #    ax.set_xticklabels(ax.get_xticklabels(), rotation = rotation)
     ### color bar position and title ref: https://stackoverflow.com/questions/67909597/seaborn-clustermap-colorbar-adjustment
-    ### color bar position adjustment
+    ### color bar position adjustment ###
     x0, _y0, _w, _h = g.cbar_pos
     g.ax_cbar.set_position([x0, _y0*scale_factor+0.1, row.width*scale_factor, 0.05])
     g.ax_cbar.set_title('-log2 FDR')        
@@ -151,48 +137,40 @@ def generateheatmap(mtx,deg_names,pag_ids,**kwargs):
     plt.rcParams["axes.grid"] = False       
     return(plt)
 
-
+### manually changed color scale ###
 # color in hex_map format
 colorUnit = 56
 top = cm.get_cmap('Blues_r', colorUnit)
 bottom = cm.get_cmap('Reds', colorUnit)
 newcolors = np.vstack((
-    top(np.linspace(0, 1, 56)),([[1,1,1,0]]),
+    top(np.linspace(0, 1, 56)),([[1,1,1,1]]),
     bottom(np.linspace(0, 1, 56))
 ))
 newcmp = ListedColormap(newcolors, name='RedBlue')
 hex_map = [matplotlib.colors.to_hex(i, keep_alpha=True) for i in newcolors]
 
+### user interface ###
+st.title('PAGER-scFGA: an online interactive single-cell functional genomics analysis platform')
+st.header('An case study of natural killer cell functional maturation and differentiation')
 
-#st.title('GBM-PDX Data Analysis in U01 Project')
-st.title('Interactive Single Cell Analysis')
-st.header('An online interactive analytical platform for single cell functional genomic downstream analysis')
-st.markdown('*Zongliang Yue, Robert S. Welner, and Jake Chen*')
+#################
+### side manu ###
+#st.sidebar.subheader('Code source')
+#link = 'The scanpy python script is [https://scanpy-tutorials.readthedocs.io/en/latest/index.html](https://scanpy-#tutorials.readthedocs.io/en/latest/index.html)'
+#st.sidebar.markdown(link, unsafe_allow_html=True)
 
-
-st.sidebar.subheader('Code source')
-link = 'The scanpy python script is [https://scanpy-tutorials.readthedocs.io/en/latest/index.html](https://scanpy-tutorials.readthedocs.io/en/latest/index.html)'
-st.sidebar.markdown(link, unsafe_allow_html=True)
-
-
-
-#st.sidebar.text("1.NHBE: Primary human lung epithelium.\n2.A549: Lung alveolar.\n3.Calu3:The transformed lung-derived Calu-3 cells.\n4.Lung: The lung samples.\n5.NP: The nasopharyngeal samples.\n6.PBMC: The peripheral blood mononuclear cell.\n7.Leukocyte: The leukocytes.\n8.hiPSC:Human induced pluripotent stem cell-derived cardiomyocytes\n9.Liver Organoid.\n10.Pancreas Organoid")
 workingdir = st.sidebar.selectbox(
-    'select a pre-processed single cell dataset::',
+    'select a pre-processed single cell dataset:',
     tuple(['mouse_NK']),key='workingdir'
     )
 link = "1.mouse_NK is natural killer cells from mouse samples. (confidential)"
 st.sidebar.markdown(link, unsafe_allow_html=True)
-
 st.sidebar.markdown('You selected `%s`' % workingdir)
 
 
 
-
-
-#https://github.com/streamlit/streamlit/issues/400
+### functions ###
 # get download link
-
 #@st.cache(allow_output_mutation=True)
 def get_table_download_link(df, **kwargs):
     """Generates a link allowing the data in a given panda dataframe to be downloaded
@@ -206,8 +184,6 @@ def get_table_download_link(df, **kwargs):
         prefix += kwargs['fileName']
     href = f'<a href="data:file/csv;base64,{b64}" download="'+kwargs['fileName']+'\.txt">'+prefix+'</a>'
     return(href)
-
-
 
 
 def load_files(file_list):
@@ -230,7 +206,7 @@ def chunk_array(arr, chunk_size):
 
 
 # Return GBM treatment data as a data frame.
-@st.cache(allow_output_mutation=True)
+#@st.cache(allow_output_mutation=True)
 def load_h5ad_file(workingdir):
     #df = pd.read_csv('SampleTreatment.txt',sep="\t")
     #adata_merge = sc.read_h5ad('input/'+workingdir+'/'+'scanpy_adata_merge_15249_unregress.h5ad')
@@ -239,7 +215,6 @@ def load_h5ad_file(workingdir):
     output_dir = 'input/'+workingdir+'/scanpy_adata_merge_15249_unregress/'
     file_list = glob.glob(os.path.join(output_dir, "*"))
     load_files(file_list[0:4])
-
     ######
     description = pd.read_csv('input/'+workingdir+'/'+'description.txt',sep="\t")
     cellpop = pd.read_csv('input/'+workingdir+'/'+'cellpop.txt',sep="\t")
@@ -267,7 +242,6 @@ def run_pager(genes, sources, olap, sim, fdr):
 	params['FDR'] = np.float64(fdr)
 	params['ge'] = 1
 	params['le'] = 2000
-
 	response = requests.post('http://discovery.informatics.uab.edu/PAGER/index.php/geneset/pagerapi', data=params)
 #	print(response.request.body)
 	return pd.DataFrame(response.json())
@@ -290,9 +264,6 @@ def run_force_layout(G):
     pos=nx.spring_layout(G, dim=2, k=None, pos=None, fixed=None, iterations=50, weight='weight', scale=1.0)
     return(pos)
 
-
-
-
 #st.header('Query Clinical Data')
 #st.markdown("These data are read from U-BRITE's *treament* programmatically from a secure call the *Unified Web Services* (UWS) API at http://ubritedvapp1.hs.uab.edu:8080/UbriteServices/getalli2b2demographics?requestorid=rdalej&cohortid=27676&format=csv.")
 #clinical_data_load_state = st.text('Loading data ... ')
@@ -301,30 +272,16 @@ def run_force_layout(G):
 #st.write(clinical_data)
 
 ###############
+
+# load data #
 description,cellpop = load_h5ad_file(workingdir)
 
-
-### multiple tab show tabs ###
-#li_items = "".join(
-#    f"""
-#    <li class="nav-item">
-#        <a class="nav-link{' active' if t==active_tab else ''}" href="/?tab={t}" target="_self">{t}</a>
-#    </li>
-#    """
-#    for t in tabs
-#)
-#tabs_html = f"""
-#    <ul class="nav nav-tabs">
-#    {li_items}
-#    </ul>
-#"""
-#st.markdown(tabs_html, unsafe_allow_html=True)
-#st.markdown("<br>", unsafe_allow_html=True)
-#############
-data, tab1, tab2, tab3, tab4, tab5 = st.tabs(tabs)
 adata_merge = st.session_state['adata_merge']
+
+# tabs #
+tabs = ["Data","Step1","Step2","Step3","Step4","Step5"]
+data, tab1, tab2, tab3, tab4, tab5 = st.tabs(tabs)
 with data:
-#if active_tab == "Data":
     st.header('Dataset description')
     st.table(description)
     st.markdown(get_table_download_link(description, fileName = " "+workingdir+' sample description'), unsafe_allow_html=True)  
@@ -351,20 +308,8 @@ pct = pct.reset_index()
 colors_custm = ['steelblue','darkorange','green']
 leiden_max = max(pct['leiden'].astype('int')) + 1
 
-with tab1:
-    ###############
-    st.header('Section 1: Show the single cell map using t-SNE* or UMAP* dimensional reduction')
-    method = st.selectbox(
-    'method',
-    ("tSNE","UMAP"),
-    key="method_box"
-    )
-    sel_cluster = st.multiselect('Select clusters',
-        tuple([str(leiden_idx) for leiden_idx in list(range(0,leiden_max))]),
-        tuple([str(leiden_idx) for leiden_idx in list(range(0,leiden_max))])
-    )
-    adata_merge_filtered = adata_merge[adata_merge.obs[adata_merge.obs.leiden.isin(sel_cluster)].index]
-    st.session_state['adata_merge_filtered'] = adata_merge_filtered
+
+def plot_map(adata_merge_filtered,method,sel_cluster):
     sc.tl.dendrogram(adata_merge_filtered,groupby="leiden")
     if method == "tSNE":
         #fig, axs = plt.subplots(1, 2, figsize=(8,4),constrained_layout=True)
@@ -372,18 +317,13 @@ with tab1:
                             ))
         st.pyplot(sc.pl.tsne(adata_merge_filtered, color="leiden", title=" tSNE", add_outline=True, #legend_loc='on data',
                    legend_fontsize=12, legend_fontoutline=2,frameon=True))
-
+    
     elif method == "UMAP":
         #fig, axs = plt.subplots(1, 2, figsize=(8,4),constrained_layout=True)
         st.pyplot(sc.pl.umap(adata_merge_filtered, color="sample", title=" UMAP",frameon=True, #legend_loc='on data'
                             ))
         st.pyplot(sc.pl.umap(adata_merge_filtered, color="leiden", title=" UMAP", add_outline=True, #legend_loc='on data',
                    legend_fontsize=12, legend_fontoutline=2,frameon=True))
-
-    #import plotly.express as px
-    #fig = px.scatter(x=adata.obsm['X_tsne'][:,0], y=adata.obsm['X_tsne'][:,1],color=adata.obs['bulk_labels'])
-    #fig.show()
-
     # https://plotly.com/python/pie-charts/#basic-pie-chart-with-gopie
     vec = []
     for i in range(0,int(np.ceil(leiden_max/3))):
@@ -403,40 +343,78 @@ with tab1:
                       marker=dict(colors=['steelblue','darkorange','green'], line=dict(color='#000000', width=2)))
     st.plotly_chart(fig)
 
+with tab1:
+    st.header('Section 1: Show the single cell map using t-SNE* or UMAP* dimensional reduction')  
+    with st.form("formStep1"):
+        method = st.selectbox(
+        'method',
+        ("tSNE","UMAP"),
+        key="method_box"
+        )
+        sel_cluster = st.multiselect('Select clusters',
+            tuple([str(leiden_idx) for leiden_idx in list(range(0,leiden_max))]),
+            tuple([str(leiden_idx) for leiden_idx in list(range(0,leiden_max))])
+        )
+        submit_button1 = st.form_submit_button("Plot!") #,on_click=trigger(step1_)
+    if submit_button1:
+        st.session_state['method'] = method
+        st.session_state['sel_cluster'] = sel_cluster     
+        adata_merge_filtered = adata_merge[adata_merge.obs[adata_merge.obs.leiden.isin(sel_cluster)].index]
+        st.session_state['adata_merge_filtered'] = adata_merge_filtered
+    
+    # initiate the parameters #
+    st.session_state['method'] = "tSNE" if 'method' not in st.session_state.keys() else st.session_state['method']
+    st.session_state['sel_cluster'] = tuple([str(leiden_idx) for leiden_idx in list(range(0,leiden_max))]) if 'sel_cluster' not in st.session_state.keys() else st.session_state['sel_cluster']
+    st.session_state['adata_merge_filtered'] = adata_merge if 'adata_merge_filtered' not in st.session_state.keys() else st.session_state['adata_merge_filtered']
+    plot_map(st.session_state['adata_merge_filtered'],st.session_state['method'],st.session_state['sel_cluster'])
+        
+    #import plotly.express as px
+    #fig = px.scatter(x=adata.obsm['X_tsne'][:,0], y=adata.obsm['X_tsne'][:,1],color=adata.obs['bulk_labels'])
+    #fig.show()
+    
 with tab2:
     ###############
     st.header('Section 2: Show the marker expression mapping')
-    
-    marker = pd.read_csv('input/'+workingdir+'/'+'marker.txt',sep="\t")
-    st.table(marker)
-    st.markdown(get_table_download_link(marker, fileName = " "+workingdir+' marker'), unsafe_allow_html=True) 
-    markers = ["Itgam","Cd27","Klrb1c","Il2rb"]
-    if method == "tSNE":
-        st.pyplot(sc.pl.tsne(adata_merge_filtered, color=markers, s=50, frameon=False, vmax='p99',ncols = 2,cmap="viridis"))
-    elif method == "UMAP":    
-        st.pyplot(sc.pl.umap(adata_merge_filtered, color=markers, s=50, frameon=False, vmax='p99',ncols = 2,cmap="viridis"))
-    
-    marker = st.selectbox(
-    'marker',
-    tuple(adata_merge_filtered.var_names.sort_values()),
-        key="marker_box"
-        )
-    if method == "tSNE":
-        st.pyplot(sc.pl.tsne(adata_merge_filtered, color=[marker], s=50, frameon=False, vmax='p99',cmap="viridis"))
-        st.pyplot(sc.pl.violin(adata_merge_filtered, [marker], groupby='leiden'))
-        #sc.pl.violin(adata_merge_filtered, [marker], groupby='leiden')
-    elif method == "UMAP":    
-        st.pyplot(sc.pl.umap(adata_merge_filtered, color=[marker], s=50, frameon=False, vmax='p99',cmap="viridis"))
-        st.pyplot(sc.pl.violin(adata_merge_filtered, [marker], groupby='leiden'))
-        #sc.pl.violin(adata_merge_filtered, [marker], groupby='leiden')
-    
+    if 'adata_merge_filtered' in st.session_state.keys():
+        adata_merge_filtered = st.session_state['adata_merge_filtered']
+        ### default markers ### 
+        marker = pd.read_csv('input/'+workingdir+'/'+'marker.txt',sep="\t")
+        st.table(marker)
+        st.markdown(get_table_download_link(marker, fileName = " "+workingdir+' marker'), unsafe_allow_html=True) 
+        markers = ["Itgam","Cd27","Klrb1c","Il2rb"]
+        if method == "tSNE":
+            st.pyplot(sc.pl.tsne(adata_merge_filtered, color=markers, s=50, frameon=False, vmax='p99',ncols = 2,cmap="viridis"))
+        elif method == "UMAP":    
+            st.pyplot(sc.pl.umap(adata_merge_filtered, color=markers, s=50, frameon=False, vmax='p99',ncols = 2,cmap="viridis"))
+        with st.form("formStep2"):
+            marker = st.selectbox(
+            'marker',
+            tuple(adata_merge_filtered.var_names.sort_values()),
+                key="marker_box"
+                )     
+            submit_button2 = st.form_submit_button("Plot!") #,on_click=trigger(step1_)
+        if submit_button2:
+            st.session_state['marker'] = marker
+        # initiate the parameters #
+        marker = adata_merge_filtered.var_names.sort_values()[0] if 'marker' not in st.session_state.keys() else st.session_state['marker']  
+        method = "tSNE" if 'method' not in st.session_state.keys() else st.session_state['method']
+        if method == "tSNE":
+            st.pyplot(sc.pl.tsne(adata_merge_filtered, color=[marker], s=50, frameon=False, vmax='p99',cmap="viridis"))
+            st.pyplot(sc.pl.violin(adata_merge_filtered, [marker], groupby='leiden'))
+            #sc.pl.violin(adata_merge_filtered, [marker], groupby='leiden')
+        elif method == "UMAP":    
+            st.pyplot(sc.pl.umap(adata_merge_filtered, color=[marker], s=50, frameon=False, vmax='p99',cmap="viridis"))
+            st.pyplot(sc.pl.violin(adata_merge_filtered, [marker], groupby='leiden'))
+            #sc.pl.violin(adata_merge_filtered, [marker], groupby='leiden')
+        
 ###############
-# return the cluster comparison using the differeially expressed gene analysis 
+# return the cluster comparison using the differentially expressed gene analysis 
 
 def compute_DEG(cluster_name,selected_cluster,referece_cluster):
     sc.tl.rank_genes_groups(adata_merge_filtered, cluster_name, groups=[str(selected_cluster)],reference=str(referece_cluster),
                             method='wilcoxon',key_added = "wilcoxon")
     st.session_state['adata_merge_filtered'] = adata_merge_filtered
+    
 @st.cache(allow_output_mutation=True)    
 def get_wilcoxon_result(adata_merge_filtered,selected_cluster):
     res_pd = pd.DataFrame()
@@ -459,65 +437,97 @@ def marker_filter(res_pd,user_score_min, user_score_max,user_lf_min, user_lf_max
     res_pd_filter = res_pd_filter.reset_index(drop=True)
     return(res_pd_filter)
 
-if 'res_pd_filter' not in st.session_state.keys():
-    st.session_state['res_pd_filter']=pd.DataFrame()
 with tab3:
     st.header('Section 3: Select cluster to perform differentially expressed gene analysis')
-    selected_cluster = st.selectbox('Selected cluster',
-        tuple([str(leiden_idx) for leiden_idx in list(range(0,leiden_max))]),                   
-        (0),
-        key="selected_box"
-    )
-    referece_cluster = st.selectbox('Reference cluster',
-        tuple([str(leiden_idx) for leiden_idx in list(range(0,leiden_max)) if str(leiden_idx)!=str(selected_cluster)] + ['rest']),  
-        (leiden_max-1),
-        key="referece_box"
-    )
-    fileName = 'c'+str(selected_cluster)+'_vs_'+'c'+str(referece_cluster) 
-    data_btn = st.button("Perform wilcoxon analysis")
-    
+    sel_cluster = st.session_state['sel_cluster']
+    #st.write(len(sel_cluster))
     cluster_name = 'leiden'
     method_name = 'wilcoxon'
     
+    
+    selected_cluster = st.selectbox('Selected cluster',
+        tuple([int(leiden_idx) for leiden_idx in sel_cluster]),                   
+        (int(sel_cluster[0])),
+        key="selected_box"
+    )
+    referece_cluster = st.selectbox('Reference cluster',
+        tuple([int(leiden_idx) for leiden_idx in sel_cluster if leiden_idx!=str(selected_cluster)] + ['rest']),  
+        (leiden_max-1),#(len(sel_cluster)),#
+        key="referece_box"
+    )      
+    button3 = st.button("Perform wilcoxon analysis!") # data_btn = st.button("Perform wilcoxon analysis")
+    if button3:
+        st.session_state['selected_cluster'] = selected_cluster       
+        st.session_state['referece_cluster'] = referece_cluster
+        fileName = 'c'+str(st.session_state['selected_cluster'])+'_vs_'+'c'+str(st.session_state['referece_cluster'])
+        st.session_state['fileName'] = fileName     
+        compute_DEG(cluster_name,st.session_state['selected_cluster'],st.session_state['referece_cluster'])
+    elif 'adata_merge_filtered' not in st.session_state.keys():
+        st.write('run...!')
+        compute_DEG(cluster_name,st.session_state['selected_cluster'],st.session_state['referece_cluster'])
+    #else:
+    #    compute_DEG(cluster_name,st.session_state['selected_cluster'],st.session_state['referece_cluster'])
+        
+    # initiate the parameters #
+    st.session_state['selected_cluster'] = int(sel_cluster[0]) if 'selected_cluster' not in st.session_state.keys() else st.session_state['selected_cluster']
+    st.session_state['referece_cluster'] = 'rest' if 'referece_cluster' not in st.session_state.keys() else st.session_state['referece_cluster']
+    st.session_state['fileName'] = 'c'+str(st.session_state['selected_cluster'])+'_vs_'+'c'+str(st.session_state['referece_cluster'])
+
+    fileName = 'c'+str(st.session_state['selected_cluster'])+'_vs_'+'c'+str(st.session_state['referece_cluster'])
+
     #if data_btn == True or (str(selected_cluster) in pd.DataFrame(adata_merge_filtered.uns[method_name]['names']).keys()):
     #    if((str(selected_cluster) in pd.DataFrame(adata_merge_filtered.uns[method_name]['names']).keys())):
     #        print("passed")
     #    else:
     #        compute_DEG(cluster_name,selected_cluster,referece_cluster)
-    if data_btn == True:
-        compute_DEG(cluster_name,selected_cluster,referece_cluster)
+    #if data_btn == True:
+    #    compute_DEG(cluster_name,selected_cluster,referece_cluster)
     #elif method_name in st.session_state['adata_merge_filtered'].uns:
     #    if str(selected_cluster) in pd.DataFrame(st.session_state['adata_merge_filtered'].uns[method_name]['names']).keys():
     #        print("passed")
-    else:
-        st.write("Please click the \"Perform wilcoxon analysis\" botton for the data processing.")
-        st.stop()
-    if method_name in st.session_state['adata_merge_filtered'].uns:
-        if str(selected_cluster) in pd.DataFrame(st.session_state['adata_merge_filtered'].uns[method_name]['names']).keys():        
-            res_pd = get_wilcoxon_result(adata_merge_filtered,selected_cluster)
-            
-            
-            score_max = int(np.floor(max(res_pd['scores'].values)))
-            score_min = int(np.floor(min(res_pd['scores'].values)))
-            lf_max = int(np.floor(max(res_pd['logfoldchanges'].values)))
-            lf_min = int(np.floor(min(res_pd['logfoldchanges'].values)))
-            
-            st.markdown("Scores and log foldchange cutoff.")
-            user_score_min, user_score_max = st.slider('scores', 
-                                           max_value=score_max,
-                                           min_value=score_min,
-                                           value=(-3, 3))
-            user_lf_min, user_lf_max = st.slider('log foldchanges', 
-                                           max_value=float(lf_max), 
-                                           min_value=float(lf_min),
-                                           value=(-1.0, 1.0))
-            res_pd_filter = marker_filter(res_pd,user_score_min, user_score_max,user_lf_min, user_lf_max)
-            
-            st.subheader(fileName+" differetially expressed genes sorted by scores (-log(p-value)*Fold Change).")
-            st.write(res_pd_filter)
-            st.markdown(get_table_download_link(pd.DataFrame(res_pd_filter), fileName = fileName+'_DEG list result'), unsafe_allow_html=True)
-            st.session_state['res_pd_filter'] = res_pd_filter
+    #else:
+    #    st.write("Please click the \"Perform wilcoxon analysis\" botton for the data processing.")
+    #    st.stop()
+    
+    res_pd = get_wilcoxon_result(st.session_state['adata_merge_filtered'],st.session_state['selected_cluster'])
+    with st.form("formStep3_2"):    
+        score_max = int(np.floor(max(res_pd['scores'].values)))
+        score_min = int(np.floor(min(res_pd['scores'].values)))
+        lf_max = int(np.floor(max(res_pd['logfoldchanges'].values)))
+        lf_min = int(np.floor(min(res_pd['logfoldchanges'].values)))
+        
+        st.markdown("Scores and log foldchange cutoff.")
+        user_score_min, user_score_max = st.slider('scores', 
+                                       max_value=score_max,
+                                       min_value=score_min,
+                                       value=(-3, 3))
+        user_lf_min, user_lf_max = st.slider('log foldchanges', 
+                                       max_value=float(lf_max), 
+                                       min_value=float(lf_min),
+                                       value=(-1.0, 1.0))
+        
+        submit_button3_2 = st.form_submit_button("Filter!") 
+    if submit_button3_2:
+        st.session_state['user_score_min'] = user_score_min
+        st.session_state['user_score_max'] = user_score_max
+        st.session_state['user_lf_min'] = user_lf_min
+        st.session_state['user_lf_max'] = user_lf_max
+    # initiate the parameters #
+    st.session_state['user_score_min'] = -3 if 'user_score_min' not in st.session_state.keys() else st.session_state['user_score_min']
+    st.session_state['user_score_max'] = 3 if 'user_score_max' not in st.session_state.keys() else st.session_state['user_score_max']
+    st.session_state['user_lf_min'] = -1.0 if 'user_lf_min' not in st.session_state.keys() else st.session_state['user_lf_min']
+    st.session_state['user_lf_max'] = 1.0 if 'user_lf_max' not in st.session_state.keys() else st.session_state['user_lf_max']
 
+    #if str(selected_cluster) in pd.DataFrame(st.session_state['adata_merge_filtered'].uns[method_name]['names']).keys(): 
+    
+    res_pd_filter = marker_filter(res_pd,st.session_state['user_score_min'], st.session_state['user_score_max'],st.session_state['user_lf_min'], st.session_state['user_lf_max'])  
+    st.session_state['res_pd_filter'] = res_pd_filter
+    ### show table ###
+    st.subheader(fileName+" differetially expressed genes sorted by scores (-log(p-value)*Fold Change).")
+    st.write(st.session_state['res_pd_filter'])
+    st.markdown(get_table_download_link(pd.DataFrame(st.session_state['res_pd_filter']), fileName = fileName+'_DEG list result'), unsafe_allow_html=True)
+    
+    
 #sampleNames=[]
 #for i in range(0,len(degs)):
 #    sampleNames.append(degs[i][0])
@@ -538,87 +548,104 @@ with tab3:
 #        st.write(degs[idx][1])
 #        st.markdown(get_table_download_link(pd.DataFrame(degs[idx][1]), fileName = degs[idx][0]+' DEG list result'), unsafe_allow_html=True)
         
-with tab4:       
+with tab4:
+    
     ########
     st.header('Section 4: Perform PAGER Analysis')
     st.markdown("The list of significantly differentially expressed genes (DEG) is then passed to Pathways, Annotated gene lists, and Gene signatures Electronic Repository (PAGER), which offers a network-accessible REST API for performing various gene-set, network, and pathway analyses.")
-    if st.session_state['res_pd_filter'].shape[0]!=0:
-        res_pd_filter = st.session_state['res_pd_filter']
-        st.sidebar.subheader('Adjust PAGER Parameters')
+    
+    res_pd_filter = st.session_state['res_pd_filter']
+    # modified PAG enrichment
+    PAGERSet=pd.DataFrame()
+    deg_names=[]
+    pag_ids=[]
+    pags=[]
+    PAG_val=dict()
+    #st.write(genes)
+
+    ## simple upper case in transforming homologous gene symbol from mouse to human
+    #res_pd_filter['human_symbol'] = [x.upper() for x in res_pd_filter['names'].values.tolist() if str(x) != 'nan']
+    # homolog
+    homologene = pd.read_csv('homologene'+'/'+'homologene_builld68.data.txt',
+                             sep="\t",header=None)
+    homocolnames = ["homologene","tax_id","gene_id","symbol","ensembl","protein"]
+    homologene.columns = homocolnames
+    human_gene = homologene[(homologene['tax_id'] == 9606)]
+    mouse_gene = homologene[(homologene['tax_id'] == 10090)]
+    human_mouse = human_gene.merge(mouse_gene,left_on='homologene', right_on='homologene', how='outer')
+    mouse_human_map = human_mouse[human_mouse['symbol_y'].isin(res_pd_filter['names'])]
+    mouse_human_gene = mouse_human_map[['symbol_x','symbol_y']]
+    mouse_human_gene = mouse_human_gene.rename(columns={'symbol_x':'human','symbol_y':'mouse_symbol'})
+    res_pd_filter = res_pd_filter.merge(mouse_human_gene,left_on="names",right_on="mouse_symbol")
+    # Remove nan from gene list.
+    genes = res_pd_filter['human'][~res_pd_filter['human'].isna()].unique()
+    
+    with st.form("formStep4"):
+        
+        st.subheader('Adjust PAGER Parameters')
+        
         link = 'The PAGER database detail [http://discovery.informatics.uab.edu/PAGER/](http://discovery.informatics.uab.edu/PAGER/)'
-        st.sidebar.markdown(link, unsafe_allow_html=True)
-        sources = st.sidebar.multiselect('Available Data Sources',
-            ("WikiPathway_2021_HUMAN","Reactome_2021","KEGG_2021","Spike","BioCarta","NCI-Nature Curated","GeoMx Cancer Transcriptome Atlas","Microcosm Targets","TargetScan","mirTARbase","NGS Catalog","GTEx","HPA-TCGA","HPA-PathologyAtlas","HPA-GTEx","HPA-FANTOM5","HPA-normRNA","HPA-RNAcon","GOA","I2D","Cell","HPA-CellAtlas","CellMarker","GAD","GWAS Catalog","PheWAS","MSigDB","GeneSigDB","PharmGKB","DSigDB","Genome Data","Protein Lounge","Pfam","Isozyme","HPA-normProtein"),
-            ("WikiPathway_2021_HUMAN","Reactome_2021","KEGG_2021","Spike","BioCarta","NCI-Nature Curated")
-        )
+        st.markdown(link, unsafe_allow_html=True)
         
-        
-        olap = st.sidebar.text_input("Overlap ≥", 1)
-        sim = st.sidebar.slider('Similarity score ≥', 0.0, 1.0, 0.05, 0.01)
-        fdr = st.sidebar.slider('-log2-based FDR Cutoff', 0, 300, 3, 1)
-        fdr = np.power(2,-np.float64(fdr))
-        
-        # modified PAG enrichment
-        PAGERSet=pd.DataFrame()
-        deg_names=[]
-        pag_ids=[]
-        pags=[]
-        PAG_val=dict()
-        # Remove nan from gene list.
-        
-        ## simple upper case in transforming homologous gene symbol from mouse to human
-        #res_pd_filter['human_symbol'] = [x.upper() for x in res_pd_filter['names'].values.tolist() if str(x) != 'nan']
-        # homolog
-        homologene = pd.read_csv('homologene'+'/'+'homologene_builld68.data.txt',
-                                 sep="\t",header=None)
-        homocolnames = ["homologene","tax_id","gene_id","symbol","ensembl","protein"]
-        homologene.columns = homocolnames
-        human_gene = homologene[(homologene['tax_id'] == 9606)]
-        mouse_gene = homologene[(homologene['tax_id'] == 10090)]
-        human_mouse = human_gene.merge(mouse_gene,left_on='homologene', right_on='homologene', how='outer')
-        mouse_human_map = human_mouse[human_mouse['symbol_y'].isin(res_pd_filter['names'])]
-        mouse_human_gene = mouse_human_map[['symbol_x','symbol_y']]
-        mouse_human_gene = mouse_human_gene.rename(columns={'symbol_x':'human','symbol_y':'mouse_symbol'})
-        res_pd_filter = res_pd_filter.merge(mouse_human_gene,left_on="names",right_on="mouse_symbol")
-        genes = res_pd_filter['human'][~res_pd_filter['human'].isna()].unique()
-        
-        
-        #st.write(genes)
-        #pager_run_state = st.text('Calling PAGER REST API ... ')
-        if len(genes) != 0:
-            pager_output = run_pager(genes, sources, olap, sim, fdr)
-            #pager_run_state.text('Calling PAGER REST API ... done!')
-            #st.write(pager_output)
-            st.subheader('View/Filter Results')
-            # Convert GS_SIZE column from object to integer dtype.
-            # See https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.astype.html.
-            pager_output = pager_output.astype({'GS_SIZE': 'int32'})
-            gs_sizes = pager_output['GS_SIZE'].tolist()
-            # Figure out the min and max GS_SIZE within the PAGER output.
-            min_gs_size = min(gs_sizes)
-            max_gs_size = max(gs_sizes)
-            # Set up a range slider. Cool!
-            # See https://streamlit.io/docs/api.html#streamlit.slider.
-            user_min, user_max = st.slider('GS_SIZE Range', max_value=max_gs_size, value=(min_gs_size, max_gs_size))
-            filtered_output = pager_output[pager_output['GS_SIZE'].between(user_min, user_max)]
-            filtered_output = filtered_output.sort_values(['pFDR'],ascending=True)
-            filtered_output = filtered_output.reset_index(drop=True)
-            st.subheader(fileName+" enriched PAG sorted by p-value False Discovery Rate (FDR).")    
-            st.write(filtered_output)            
-            if(len(filtered_output.index)>0):
-                for row in filtered_output.iloc[:,[0,1,-1]].values:
-                    pag_id=str(row[0])+"_"+str(row[1])
-                    pags.append(pag_id)
-                    pag_ids=pag_ids+[pag_id]
-                    val=-np.log(row[2])/np.log(10)
-                    PAG_val[pag_id]=val
-            filtered_output['SAMPLE'] = "c"+str(selected_cluster)
-            #PAGERSet = PAGERSet.append(filtered_output)
-            PAGERSet = pd.concat([PAGERSet, filtered_output])
-            st.markdown(get_table_download_link(filtered_output, fileName = fileName +' geneset enrichment result'), unsafe_allow_html=True)
-        PAGERSet = pd.DataFrame(PAGERSet)
+        sources = st.multiselect('Available Data Sources',
+                ("WikiPathway_2021_HUMAN","Reactome_2021","KEGG_2021","Spike","BioCarta","NCI-Nature Curated","GeoMx Cancer Transcriptome Atlas","Microcosm Targets","TargetScan","mirTARbase","NGS Catalog","GTEx","HPA-TCGA","HPA-PathologyAtlas","HPA-GTEx","HPA-FANTOM5","HPA-normRNA","HPA-RNAcon","GOA","I2D","Cell","HPA-CellAtlas","CellMarker","GAD","GWAS Catalog","PheWAS","MSigDB","GeneSigDB","PharmGKB","DSigDB","Genome Data","Protein Lounge","Pfam","Isozyme","HPA-normProtein"),
+                ("WikiPathway_2021_HUMAN","Reactome_2021","KEGG_2021","Spike","BioCarta","NCI-Nature Curated")
+            )       
+        olap = st.text_input("Overlap ≥", 1)    
+        sim = st.slider('Similarity score ≥', 0.0, 1.0, 0.05, 0.01)    
+        fdr = st.slider('-log2-based FDR Cutoff', 0, 300, 3, 1)      
+        fdr = np.power(2,-np.float64(fdr))  
+        submit_button4 = st.form_submit_button("Filter!")
+         
+    if submit_button4:    
+        st.session_state['sources'] = sources       
+        st.session_state['olap'] = olap        
+        st.session_state['sim'] = sim       
+        st.session_state['fdr'] = fdr
+         
+    # initiate the parameters #
+    st.session_state['sources'] = ("WikiPathway_2021_HUMAN","Reactome_2021","KEGG_2021","Spike","BioCarta","NCI-Nature Curated") if 'sources' not in st.session_state.keys() else st.session_state['sources']
+    st.session_state['olap'] = 1 if 'olap' not in st.session_state.keys() else st.session_state['olap']
+    st.session_state['sim'] = 0.01 if 'sim' not in st.session_state.keys() else st.session_state['sim']
+    st.session_state['fdr'] = np.power(2,-np.float64(3)) if 'fdr' not in st.session_state.keys() else st.session_state['fdr']
+    
 
-
+    #pager_run_state = st.text('Calling PAGER REST API ... ')
+    if len(genes) != 0:
+        pager_output = run_pager(genes, st.session_state['sources'], st.session_state['olap'], st.session_state['sim'], st.session_state['fdr'])
+        #pager_run_state.text('Calling PAGER REST API ... done!')
+        #st.write(pager_output)
+        st.subheader('View/Filter Results')
+        # Convert GS_SIZE column from object to integer dtype.
+        # See https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.astype.html.
+        pager_output = pager_output.astype({'GS_SIZE': 'int32'})
+        gs_sizes = pager_output['GS_SIZE'].tolist()
+        # Figure out the min and max GS_SIZE within the PAGER output.
+        min_gs_size = min(gs_sizes)
+        max_gs_size = max(gs_sizes)
+        # Set up a range slider. Cool!
+        # See https://streamlit.io/docs/api.html#streamlit.slider.
+        user_min, user_max = st.slider('GS_SIZE Range', max_value=max_gs_size, value=(min_gs_size, max_gs_size))
+        filtered_output = pager_output[pager_output['GS_SIZE'].between(user_min, user_max)]
+        filtered_output = filtered_output.sort_values(['pFDR'],ascending=True)
+        filtered_output = filtered_output.reset_index(drop=True)
+        st.subheader(fileName+" enriched PAG sorted by p-value False Discovery Rate (FDR).")    
+        st.write(filtered_output)            
+        if(len(filtered_output.index)>0):
+            for row in filtered_output.iloc[:,[0,1,-1]].values:
+                pag_id=str(row[0])+"_"+str(row[1])
+                pags.append(pag_id)
+                pag_ids=pag_ids+[pag_id]
+                val=-np.log(row[2])/np.log(10)
+                PAG_val[pag_id]=val
+        filtered_output['SAMPLE'] = "c"+str(selected_cluster)
+        #PAGERSet = PAGERSet.append(filtered_output)
+        PAGERSet = pd.concat([PAGERSet, filtered_output])
+        st.markdown(get_table_download_link(filtered_output, fileName = fileName +' geneset enrichment result'), unsafe_allow_html=True)
+    PAGERSet = pd.DataFrame(PAGERSet)
+    st.session_state['PAGERSet'] = PAGERSet
+    st.session_state['pag_ids'] = pag_ids
+    st.session_state['res_pd_filter'] = res_pd_filter
 ##st.write(PAGERSet.shape[1])
 #if PAGERSet.shape[1] < 2:
 #    st.write("No enriched PAGs found. Try a lower similarity score or a lower -log2-based FDR cutoff and rerun.")
@@ -683,189 +710,189 @@ def PPIgeneration(geneInt,symbol2idx):
 
 with tab5:    
     st.header('Section 5: Generate the network of the selected PAG')
-    if st.session_state['res_pd_filter'].shape[0]!=0:
-        res_pd_filter = st.session_state['res_pd_filter']
-        st.write('Select a PAG_ID here:')
-        #st.write(pag_ids)
-        PAGid = st.selectbox(
-            'Available PAG_IDs',
-            tuple(pag_ids),
-            key = "PAG_ID_box"
-            )
-        #st.write(PAGid)
-        
-        
-        ID_only = re.sub("([A-Z0-9]+)_[^_]*","\\1",str(PAGid))
-        link = "For the selected PAG "+ str(PAGid)+"'s gene information. (http://discovery.informatics.uab.edu/PAGER/index.php/geneset/view/"+ID_only+")"
-        st.markdown(link, unsafe_allow_html=True)
-        
-        
-        geneInt = run_pager_int(ID_only)
-        geneRanked = pag_ranked_gene(ID_only)
-        #st.write(geneRanked)
-        
-        idx2symbol = dict()
-        symbol2idx = dict()
-        symbol2size = dict()
-        idx=0
-        geneRanked['RP_SCORE'].fillna(0.1, inplace=True)
-        geneRanked['RP_SCORE'] = geneRanked['RP_SCORE'].astype(float)
-        geneRanked['node_size'] = geneRanked['RP_SCORE'] *4
-        st.write(geneRanked)
-        for gene_idx in range(0,geneRanked.shape[0]):
-            gene = geneRanked.iloc[gene_idx,]
-            #st.write(gene)
-            symbol2idx[gene['GENE_SYM']] = str(idx)
-            #st.write(gene['RP_SCORE'])
-            #symbol2size[gene['GENE_SYM']] = gene['RP_SCORE']
-            if(gene['RP_SCORE'] is not None):
-                symbol2size[gene['GENE_SYM']] = gene['node_size']
-            else:
-                symbol2size[gene['GENE_SYM']] = 1
-            idx2symbol[str(idx)] = gene['GENE_SYM']
-            idx+=1
-        
-        
-        (idxPair,PPI,idx2symbol) = PPIgeneration(geneInt,symbol2idx)
-        
-        
-        #st.write(PPI)
-        
-        # spring force layout in networkx
-        #import networkx as nx
-        #G=nx.Graph()
-        #G.add_nodes_from(idx2symbol.values())
-        #G.add_edges_from(PPI)
-        #pos=run_force_layout(G)
-        
-        
-        
-        #SampleNameButton = st.radio(
-        #     "selected sample",
-        #     sampleNames,key='network')
-        colorMap = dict()
-        
-        #if SampleNameButton in [i[0] for i in degs]:    
-            #idx=[i[0] for i in degs].index(SampleNameButton)
-        #for idx in orderIdx:     
-            #deg=degs[idx]
-            #sampleName=deg[0]
-        
-        config = Config(height=500, width=700, nodeHighlightBehavior=True, highlightColor="#F7A7A6", directed=False,
-              collapsible=True,              
-              node={'labelProperty':'label',"strokeColor": "black"},
-              #, link={'labelProperty': 'label', 'renderLabel': True}
-              link={'color': "#d3d3d3"},
-                        key="agraph_"+fileName
-           )
-        st.write("Sample:"+fileName)
-        #deg_results=deg[1]
-        deg_results = res_pd_filter
-        genesExp = [x for x in deg_results[['human','logfoldchanges']].values.tolist()] # if str(x[0]) != 'nan'
-        #st.write(np.array(genesExp)[:,-1])
-        # expression data in network
-        expInNetwork=np.array(genesExp)[np.logical_or.reduce([np.array(genesExp)[:,0] == x for x in idx2symbol.values()])].tolist()
-        
-        # show expression table
-        st.write("Gene expression within the selected PAG:")
-        expInNetworkArr = np.array(expInNetwork)
-        expInNetworkArrSorted = np.array(sorted(expInNetworkArr,key = lambda expInNetworkArr:np.float64(expInNetworkArr[1]), reverse=True))
-        DataE=pd.DataFrame(expInNetworkArrSorted)
-        DataE.rename(columns={0:'symbol',1:'log2FC'},inplace=True)
-        st.write(DataE)
-        
-        ### show expression figure ###
-        marker_genes = res_pd_filter[res_pd_filter.human.isin(DataE.symbol.values)].mouse_symbol
-        option = st.selectbox(
-             'Type of gene expression\'s figure',
-             ('dotplot', 'violin','matrix'))
-        st.write('You selected:', option)
-        sc.tl.dendrogram(adata_merge_filtered,groupby="leiden")
-        if option == 'dotplot':      
-            dp = sc.pl.dotplot(adata_merge_filtered, marker_genes.values, groupby='leiden', return_fig=True,categories_order=sel_cluster)
-            st.pyplot(dp.add_totals().style(dot_edge_color='black', dot_edge_lw=0.5, cmap='viridis').show())
-        elif option == 'heatmap':
-            sc.tl.dendrogram(adata_merge_filtered,groupby="leiden")
-            st.pyplot(sc.pl.heatmap(adata_merge_filtered, marker_genes.values, groupby='leiden', swap_axes=True,cmap="viridis"))
-        elif option == 'violin':
-            st.pyplot(sc.pl.stacked_violin(adata_merge_filtered, marker_genes.values, groupby='leiden',cmap="viridis",categories_order=sel_cluster))
-        elif option == 'matrix':   
-            st.pyplot(sc.pl.matrixplot(adata_merge_filtered, marker_genes.values, groupby='leiden',cmap="viridis",categories_order=sel_cluster))
-        
-        
-        
-        if np.size(np.array(expInNetwork))>0:
-            zeroInNetwork=[[i,'0'] for i in idx2symbol.values() if i not in np.array(expInNetwork)[:,0]]
-        else:
-            zeroInNetwork=[[i,'0'] for i in idx2symbol.values()]
-        for i in zeroInNetwork:
-            expInNetwork.append(i)
-            
-        
-        
-        # And a data frame with characteristics for your nodes in networkx
-        carac = pd.DataFrame({'ID':np.array(expInNetwork)[:,0], 
-                              'myvalue':[np.float64(i) for i in np.array(expInNetwork)[:,1]] })
-        
-        # Plot it, providing a continuous color scale with cmap:
-        # Here is the tricky part: I need to reorder carac, to assign the good color to each node
-        carac = carac.set_index('ID')
-        #carac = carac.reindex(G.nodes())
-        # load network function 
-        #X = Network.generateNetwork(carac,pos,PPI)
-        #st.pyplot(plt,caption=sampleName)
-        #image = Image.open('./network.png')
-        #st.image(image, caption=sampleName,
-        #     use_column_width=True)
-        #st.write(X.nodes)
-        #st.write(X.edges)
-        #st.write(carac.to_dict()["myvalue"])
-        
-        #st.write(newcmp)
-        st.subheader(fileName+" enriched "+str(PAGid)+"'s gene network")  
-        max_val = max([np.abs(val) for val in carac.to_dict()["myvalue"].values()])
-        
-        #st.write(max_val)
-        if max_val != float(0):
-            nodes = [] 
-            for i in idx2symbol.values():             
-                #carac.to_dict()["myvalue"][str(i)]
-                nodes.append(Node(
-                    id=i, 
-                    label=str(i), 
-                    size=symbol2size[str(i)],#400,                            
-                    color=hex_map[int( carac.to_dict()["myvalue"][i]/max_val*colorUnit)+colorUnit]
-                )
-                ) # includes **kwargs
-            #edges = [Edge(source=i, label="int", target=j,color="#d3d3d3") for (i,j) in X.edges] # includes **kwargs  type="CURVE_SMOOTH"
-            edges = [Edge(source=pair[0], label="int", target=pair[1],color="#d3d3d3") for pair in PPI]
-            
-            return_value = agraph(nodes=nodes, 
-                          edges=edges, 
-                          config=config)
-            agraph(list(idx2symbol.values()), (PPI), config)
-            st.markdown(get_table_download_link(pd.DataFrame(PPI), fileName = ' '+fileName+' '+str(PAGid)+' data for interactions'), unsafe_allow_html=True)
-            st.markdown(get_table_download_link(pd.DataFrame(DataE), fileName = ' '+fileName+' '+str(PAGid)+' data for gene expressions'), unsafe_allow_html=True)
-        else:
-            st.write("No expression.")
-        #except:
-        #    st.write("You select nothing.")
-
-
-
-
-    st.header('Cite:')
-    st.write("PAGER analysis:")
-    st.write("Zongliang Yue, Qi Zheng, Michael T Neylon, Minjae Yoo, Jimin Shin, Zhiying Zhao, Aik Choon Tan, Jake Y Chen, PAGER 2.0: an update to the pathway, annotated-list and gene-signature electronic repository for Human Network Biology, Nucleic Acids Research, Volume 46, Issue D1, 4 January 2018, Pages D668–D676,https://doi.org/10.1093/nar/gkx1040")
-    st.markdown("http://discovery.informatics.uab.edu/PAGER/")
-    st.write("Protein-Protein Interactions (PPIs) in network construction:")
-    st.write("Jake Y. Chen, Ragini Pandey, and Thanh M. Nguyen, (2017) HAPPI-2: a Comprehensive and High-quality Map of Human Annotated and Predicted Protein Interactions, BMC Genomics volume 18, Article number: 182")
-    st.markdown("http://discovery.informatics.uab.edu/HAPPI/")        
+    PAGERSet = st.session_state['PAGERSet']
+    pag_ids = st.session_state['pag_ids']
+    adata_merge_filtered = st.session_state['adata_merge_filtered']
+    res_pd_filter = st.session_state['res_pd_filter']
+    fileName = st.session_state['fileName']
+    sel_cluster = st.session_state['sel_cluster']
     
-    st.header('About us:')
-    st.write(f"If you have questions or comments about the database contents, please email Dr. Jake Chen, jakechen@uab.edu.")
-    st.write("If you need any technical support, please email Zongliang Yue, zongyue@uab.edu.")
-    st.write("Our lab: AI.MED Laboratory, University of Alabama at Birmingham, Alabama, USA. Link: http://bio.informatics.uab.edu/")
+    st.write('Select a PAG_ID here:')
+    #st.write(pag_ids)
+    PAGid = st.selectbox(
+        'Available PAG_IDs',
+        tuple(pag_ids),
+        key = "PAG_ID_box"
+        )
+    #st.write(PAGid)
+    
+    ID_only = re.sub("([A-Z0-9]+)_[^_]*","\\1",str(PAGid))
+    link = "For the selected PAG "+ str(PAGid)+"'s gene information. (http://discovery.informatics.uab.edu/PAGER/index.php/geneset/view/"+ID_only+")"
+    st.markdown(link, unsafe_allow_html=True)
+    
+    geneInt = run_pager_int(ID_only)
+    geneRanked = pag_ranked_gene(ID_only)
+    #st.write(geneRanked)
+    
+    idx2symbol = dict()
+    symbol2idx = dict()
+    symbol2size = dict()
+    idx=0
+    geneRanked['RP_SCORE'].fillna(0.1, inplace=True)
+    geneRanked['RP_SCORE'] = geneRanked['RP_SCORE'].astype(float)
+    geneRanked['node_size'] = geneRanked['RP_SCORE'] *4
+    st.write(geneRanked)
+    for gene_idx in range(0,geneRanked.shape[0]):
+        gene = geneRanked.iloc[gene_idx,]
+        #st.write(gene)
+        symbol2idx[gene['GENE_SYM']] = str(idx)
+        #st.write(gene['RP_SCORE'])
+        #symbol2size[gene['GENE_SYM']] = gene['RP_SCORE']
+        if(gene['RP_SCORE'] is not None):
+            symbol2size[gene['GENE_SYM']] = gene['node_size']
+        else:
+            symbol2size[gene['GENE_SYM']] = 1
+        idx2symbol[str(idx)] = gene['GENE_SYM']
+        idx+=1
+    
+    (idxPair,PPI,idx2symbol) = PPIgeneration(geneInt,symbol2idx)
+    
+    #st.write(PPI)
+    
+    # spring force layout in networkx
+    #import networkx as nx
+    #G=nx.Graph()
+    #G.add_nodes_from(idx2symbol.values())
+    #G.add_edges_from(PPI)
+    #pos=run_force_layout(G)
+    
+    
+    
+    #SampleNameButton = st.radio(
+    #     "selected sample",
+    #     sampleNames,key='network')
+    colorMap = dict()
+    
+    #if SampleNameButton in [i[0] for i in degs]:    
+        #idx=[i[0] for i in degs].index(SampleNameButton)
+    #for idx in orderIdx:     
+        #deg=degs[idx]
+        #sampleName=deg[0]
+    
+    config = Config(height=500, width=700, nodeHighlightBehavior=True, highlightColor="#F7A7A6", directed=False,
+          collapsible=True,              
+          node={'labelProperty':'label',"strokeColor": "black"},
+          #, link={'labelProperty': 'label', 'renderLabel': True}
+          link={'color': "#d3d3d3"},
+                    key="agraph_"+fileName
+       )
+    st.write("Sample:"+fileName)
+    #deg_results=deg[1]
+    deg_results = res_pd_filter
+    st.write(res_pd_filter)
+    
+    genesExp = [x for x in deg_results[['human','logfoldchanges']].values.tolist()] # if str(x[0]) != 'nan'
+    #st.write(np.array(genesExp)[:,-1])
+    # expression data in network
+    expInNetwork=np.array(genesExp)[np.logical_or.reduce([np.array(genesExp)[:,0] == x for x in idx2symbol.values()])].tolist()
+    
+    # show expression table
+    st.write("Gene expression within the selected PAG:")
+    expInNetworkArr = np.array(expInNetwork)
+    expInNetworkArrSorted = np.array(sorted(expInNetworkArr,key = lambda expInNetworkArr:np.float64(expInNetworkArr[1]), reverse=True))
+    DataE=pd.DataFrame(expInNetworkArrSorted)
+    DataE.rename(columns={0:'symbol',1:'log2FC'},inplace=True)
+    st.write(DataE)
+    
+    ### show expression figure ###
+    marker_genes = res_pd_filter[res_pd_filter.human.isin(DataE.symbol.values)].mouse_symbol
+    #st.write(marker_genes)
+    option = st.selectbox(
+         'Type of gene expression\'s figure',
+         ('dotplot', 'violin','matrix'))
+    st.write('You selected:', option)
+    sc.tl.dendrogram(adata_merge_filtered,groupby="leiden")
+    if option == 'dotplot':      
+        dp = sc.pl.dotplot(adata_merge_filtered, marker_genes.values, groupby='leiden', return_fig=True) # ,categories_order=sel_cluster
+        st.pyplot(dp.add_totals().style(dot_edge_color='black', dot_edge_lw=0.5, cmap='viridis').show())
+    elif option == 'heatmap':
+        sc.tl.dendrogram(adata_merge_filtered,groupby="leiden")
+        st.pyplot(sc.pl.heatmap(adata_merge_filtered, marker_genes.values, groupby='leiden', swap_axes=True,cmap="viridis"))
+    elif option == 'violin':
+        st.pyplot(sc.pl.stacked_violin(adata_merge_filtered, marker_genes.values, groupby='leiden',cmap="viridis",categories_order=sel_cluster))
+    elif option == 'matrix':   
+        st.pyplot(sc.pl.matrixplot(adata_merge_filtered, marker_genes.values, groupby='leiden',cmap="viridis",categories_order=sel_cluster))
+    if np.size(np.array(expInNetwork))>0:
+        zeroInNetwork=[[i,'0'] for i in idx2symbol.values() if i not in np.array(expInNetwork)[:,0]]
+    else:
+        zeroInNetwork=[[i,'0'] for i in idx2symbol.values()]
+    for i in zeroInNetwork:
+        expInNetwork.append(i)
+        
+    # And a data frame with characteristics for your nodes in networkx
+    carac = pd.DataFrame({'ID':np.array(expInNetwork)[:,0], 
+                          'myvalue':[np.float64(i) for i in np.array(expInNetwork)[:,1]] })
+    
+    # Plot it, providing a continuous color scale with cmap:
+    # Here is the tricky part: I need to reorder carac, to assign the good color to each node
+    carac = carac.set_index('ID')
+    #carac = carac.reindex(G.nodes())
+    # load network function 
+    #X = Network.generateNetwork(carac,pos,PPI)
+    #st.pyplot(plt,caption=sampleName)
+    #image = Image.open('./network.png')
+    #st.image(image, caption=sampleName,
+    #     use_column_width=True)
+    #st.write(X.nodes)
+    #st.write(X.edges)
+    #st.write(carac.to_dict()["myvalue"])
+    
+    #st.write(newcmp)
+    st.subheader(fileName+" enriched "+str(PAGid)+"'s gene network")  
+    max_val = max([np.abs(val) for val in carac.to_dict()["myvalue"].values()])
+    
+    #st.write(max_val)
+    if max_val != float(0):
+        nodes = [] 
+        for i in idx2symbol.values():             
+            #st.write(carac.to_dict()["myvalue"][str(i)])
+            nodes.append(
+                Node(
+                id=i, 
+                    border='solid', 
+                    line= 'dashed',
+                    penwidth=5,
+                label=str(i), 
+                size=symbol2size[str(i)],#400,                            
+                color=hex_map[int(carac.to_dict()["myvalue"][str(i)]/max_val*colorUnit)+colorUnit]
+                )
+            ) # includes **kwargs
+        #edges = [Edge(source=i, label="int", target=j,color="#d3d3d3") for (i,j) in X.edges] # includes **kwargs  type="CURVE_SMOOTH"
+        #st.write(PPI)
+        edges = [Edge(source=pair[0], label='', target=pair[1],color="#d3d3d3") for pair in PPI]
+        
+        return_value = agraph(nodes=nodes, 
+                      edges=edges, 
+                      config=config)
+        #agraph(list(idx2symbol.values()), (PPI), config)
+        st.markdown(get_table_download_link(pd.DataFrame(PPI), fileName = ' '+fileName+' '+str(PAGid)+' data for interactions'), unsafe_allow_html=True)
+        st.markdown(get_table_download_link(pd.DataFrame(DataE), fileName = ' '+fileName+' '+str(PAGid)+' data for gene expressions'), unsafe_allow_html=True)
+    else:
+        st.write("No expression.")
+    #except:
+    #    st.write("You select nothing.")
+
+# Add a footer
+st.header('Cite us:')
+st.markdown(f"\n*Zongliang Yue\*, Robert S. Welner, and Jake Chen*, PAGER-scFGA: Unveiling Natural Killer Cell Functional Maturation and Differentiation through Single-Cell Functional Genomics Analysis, under review.")
+st.markdown(f"PAGER analysis:\nZongliang Yue, Qi Zheng, Michael T Neylon, Minjae Yoo, Jimin Shin, Zhiying Zhao, Aik Choon Tan, Jake Y Chen, PAGER 2.0: an update to the pathway, annotated-list and gene-signature electronic repository for Human Network Biology, Nucleic Acids Research, Volume 46, Issue D1, 4 January 2018, Pages D668–D676,https://doi.org/10.1093/nar/gkx1040\n")
+st.markdown("http://discovery.informatics.uab.edu/PAGER/")
+st.markdown(f"Protein-Protein Interactions (PPIs) in network construction:\nJake Y. Chen, Ragini Pandey, and Thanh M. Nguyen, (2017) HAPPI-2: a Comprehensive and High-quality Map of Human Annotated and Predicted Protein Interactions, BMC Genomics volume 18, Article number: 182")
+st.markdown("http://discovery.informatics.uab.edu/HAPPI/")        
+    
+st.header('About us:')
+st.write(f"If you have questions or comments about the database contents or technical support,, please email Dr. Zongliang Yue, zzy0065@auburn.edu")
+st.write("Our Research group: AI.pharm, Auburn University, Auburn, USA. https://github.com/ai-pharm-AU")
 ##for idx in range(0,len(degs)):
 ##    deg=degs[idx]
 ##    sampleName=deg[0]
