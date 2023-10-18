@@ -199,7 +199,7 @@ def load_files(file_list):
             i += 1
         del(adata)
         print(i)
-
+    return(st.session_state['adata_merge'])
 def chunk_array(arr, chunk_size):
     for i in range(0, len(arr), chunk_size):
         yield arr[i:i + chunk_size]
@@ -214,11 +214,11 @@ def load_h5ad_file(workingdir):
     ### load the chunked ###
     output_dir = 'input/'+workingdir+'/scanpy_adata_merge_15249_unregress/'
     file_list = glob.glob(os.path.join(output_dir, "*"))
-    load_files(file_list[0:4])
+    st.session_state['adata_merge'] = load_files(file_list[0:4])
     ######
     description = pd.read_csv('input/'+workingdir+'/'+'description.txt',sep="\t")
     cellpop = pd.read_csv('input/'+workingdir+'/'+'cellpop.txt',sep="\t")
-    return(description,cellpop)
+    return(st.session_state['adata_merge'],description,cellpop)
 
 # Call PAGER REST API to perform hypergeometric test and return enriched PAGs associated with given list of genes as a data frame.
 # See pathFun() in PAGER R SDK at https://uab.app.box.com/file/529139337869.
@@ -274,9 +274,9 @@ def run_force_layout(G):
 ###############
 
 # load data #
-description,cellpop = load_h5ad_file(workingdir)
+adata_merge,description,cellpop = load_h5ad_file(workingdir)
 
-adata_merge = st.session_state['adata_merge']
+#adata_merge = st.session_state['adata_merge']
 
 # tabs #
 tabs = ["Data","Step1","Step2","Step3","Step4","Step5"]
