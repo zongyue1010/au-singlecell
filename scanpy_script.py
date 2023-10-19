@@ -609,7 +609,7 @@ with tab4:
         st.session_state['fdr'] = fdr
          
     # initiate the parameters #
-    st.session_state['sources'] = ("WikiPathway_2021_HUMAN","Reactome_2021","KEGG_2021","Spike","BioCarta","NCI-Nature Curated") if 'sources' not in st.session_state.keys() else st.session_state['sources']
+    st.session_state['sources'] = ["WikiPathway_2021_HUMAN","Reactome_2021","KEGG_2021","Spike","BioCarta","NCI-Nature Curated"] if 'sources' not in st.session_state.keys() else st.session_state['sources']
     st.session_state['olap'] = 1 if 'olap' not in st.session_state.keys() else st.session_state['olap']
     st.session_state['sim'] = 0.01 if 'sim' not in st.session_state.keys() else st.session_state['sim']
     st.session_state['fdr'] = np.power(2,-np.float64(3)) if 'fdr' not in st.session_state.keys() else st.session_state['fdr']
