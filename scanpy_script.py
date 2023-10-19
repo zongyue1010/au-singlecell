@@ -19,9 +19,7 @@ import scanpy as sc
 import glob
 import anndata
 from PIL import Image
-
-
-
+pd.set_option("display.precision", 2)
 
 ### coloring library ###
 # color mapping of the gene expression #
@@ -236,27 +234,33 @@ def load_h5ad_file(workingdir):
 # See pathFun() in PAGER R SDK at https://uab.app.box.com/file/529139337869.
 #@st.cache(allow_output_mutation=True)
 def run_pager(genes, sources, olap, sim, fdr):
-	# Set up the call parameters as a dict.
-	params = {}
-	# Work around PAGER API form encode issue.
-	if(len(genes)!=0):
-		#print(genes)
-		params['genes'] = '%20'.join(genes)
-	else:
-		params['genes'] = ''
-	params['source'] = '%20'.join(sources)
-	params['type'] = 'All'
-	params['sim'] = sim
-	params['olap'] = olap
-	params['organism'] = 'All'
-	params['cohesion'] = '0'
-	params['pvalue'] = 0.05
-	params['FDR'] = np.float64(fdr)
-	params['ge'] = 1
-	params['le'] = 2000
-	response = requests.post('http://discovery.informatics.uab.edu/PAGER/index.php/geneset/pagerapi', data=params)
+    # Set up the call parameters as a dict.
+    params = {}
+    # Work around PAGER API form encode issue.
+    if(len(genes)!=0):
+    	#print(genes)
+    	params['genes'] = '%20'.join(genes)
+    else:
+    	params['genes'] = ''
+    params['source'] = '%20'.join(sources)
+    params['type'] = 'All'
+    params['sim'] = sim
+    params['olap'] = olap
+    params['organism'] = 'All'
+    params['cohesion'] = '0'
+    params['pvalue'] = 0.05
+    params['FDR'] = np.float64(fdr)
+    params['ge'] = 1
+    params['le'] = 2000
+    response = requests.post('http://discovery.informatics.uab.edu/PAGER/index.php/geneset/pagerapi',data=params)
+    response_pd=pd.DataFrame(response.json())
+    response_pd.rename(columns={'COCO_V2': 'nCoCo','SIMILARITY_SCORE':'SIMILARITY'}, inplace=True)
+    response_pd['nCoCo'] = response_pd['nCoCo'].str.extract(r'([\d]*).[\d]+')
+    #response_pd['nCoCo'] = response_pd['nCoCo'].round(2)
+    response_pd['SIMILARITY'] = response_pd['SIMILARITY'].astype('float')
+    response_pd['SIMILARITY'] = response_pd['SIMILARITY'].round(2)
 #	print(response.request.body)
-	return pd.DataFrame(response.json())
+    return(response_pd)
 
 # gene network in PAG
 #@st.cache(allow_output_mutation=True)
@@ -275,13 +279,6 @@ def pag_ranked_gene(PAGid):
 def run_force_layout(G):
     pos=nx.spring_layout(G, dim=2, k=None, pos=None, fixed=None, iterations=50, weight='weight', scale=1.0)
     return(pos)
-
-#st.header('Query Clinical Data')
-#st.markdown("These data are read from U-BRITE's *treament* programmatically from a secure call the *Unified Web Services* (UWS) API at http://ubritedvapp1.hs.uab.edu:8080/UbriteServices/getalli2b2demographics?requestorid=rdalej&cohortid=27676&format=csv.")
-#clinical_data_load_state = st.text('Loading data ... ')
-#clinical_data = load_clinical_data()
-#clinical_data_load_state.text('Loading data ... done!')
-#st.write(clinical_data)
 
 ###############
 
@@ -479,12 +476,8 @@ with tab3:
         st.session_state['fileName'] = fileName     
         compute_DEG(cluster_name,st.session_state['selected_cluster'],st.session_state['referece_cluster'])
     elif method_name not in st.session_state['adata_merge_filtered'].uns.keys():
-        #st.write("no method")
         # initiate the parameters #
         st.session_state['selected_cluster'] = selected_cluster if 'selected_cluster' not in st.session_state.keys() else st.session_state['selected_cluster']
-        #st.write(selected_cluster)
-        #st.write(sel_cluster)
-        #st.write(referece_cluster)
         if 'referece_cluster' not in st.session_state.keys():
             if len(sel_cluster)==2:
                 st.session_state['referece_cluster'] = st.session_state['sel_cluster'][-1]
@@ -496,31 +489,15 @@ with tab3:
             print('')
         compute_DEG(cluster_name,selected_cluster,referece_cluster)
     elif method_name in st.session_state['adata_merge_filtered'].uns.keys():
-        #st.write("have method")
         if (str(selected_cluster) not in pd.DataFrame(adata_merge_filtered.uns[method_name]['names']).keys()):
             compute_DEG(cluster_name,selected_cluster,referece_cluster)
-            
-    #else:
-    #    compute_DEG(cluster_name,st.session_state['selected_cluster'],st.session_state['referece_cluster'])
+    #    st.stop()            
         
     # initiate the parameters #s
     st.session_state['fileName'] = fileName = 'c'+str(selected_cluster)+'_vs_'+'c'+str(referece_cluster)
-
-    #if data_btn == True or (str(selected_cluster) in pd.DataFrame(adata_merge_filtered.uns[method_name]['names']).keys()):
-    #    if((str(selected_cluster) in pd.DataFrame(adata_merge_filtered.uns[method_name]['names']).keys())):
-    #        print("passed")
-    #    else:
-    #        compute_DEG(cluster_name,selected_cluster,referece_cluster)
-    #if data_btn == True:
-    #    compute_DEG(cluster_name,selected_cluster,referece_cluster)
-    #elif method_name in st.session_state['adata_merge_filtered'].uns:
-    #    if str(selected_cluster) in pd.DataFrame(st.session_state['adata_merge_filtered'].uns[method_name]['names']).keys():
-    #        print("passed")
-    #else:
-    #    st.write("Please click the \"Perform wilcoxon analysis\" botton for the data processing.")
-    #    st.stop()
-    
+    # perform Wilcoxon analysis
     res_pd = get_wilcoxon_result(st.session_state['adata_merge_filtered'],selected_cluster)
+    
     with st.form("formStep3_2"):    
         score_max = int(np.floor(max(res_pd['scores'].values)))
         score_min = int(np.floor(min(res_pd['scores'].values)))
@@ -624,7 +601,7 @@ with tab4:
             )       
         olap = st.text_input("Overlap ≥", 1)    
         sim = st.slider('Similarity score ≥', 0.0, 1.0, 0.05, 0.01)    
-        fdr = st.slider('-log2-based FDR Cutoff', 0, 300, 3, 1)      
+        fdr = st.slider('-log2-based FDR Cutoff', 0.0, 300.0, 4.3, 0.1)      
         fdr = np.power(2,-np.float64(fdr))  
         submit_button4 = st.form_submit_button("Filter!")
          
@@ -643,10 +620,6 @@ with tab4:
 
     #pager_run_state = st.text('Calling PAGER REST API ... ')
     if len(genes) != 0:
-        #st.write(st.session_state['sources'])
-        #st.write(st.session_state['olap'])
-        #st.write(st.session_state['sim'])
-        #st.write(st.session_state['fdr'])
         pager_output = run_pager(genes, st.session_state['sources'], st.session_state['olap'], st.session_state['sim'], st.session_state['fdr'])
         #pager_run_state.text('Calling PAGER REST API ... done!')
         #st.write(pager_output)
@@ -759,9 +732,7 @@ with tab5:
         tuple(pag_ids),
         key = "PAG_ID_box"
     )
-
-         
-    
+  
     #st.write(PAGid)
     
     ID_only = re.sub("([A-Z0-9]+)_[^_]*","\\1",str(PAGid))
@@ -779,6 +750,8 @@ with tab5:
     geneRanked['RP_SCORE'].fillna(0.1, inplace=True)
     geneRanked['RP_SCORE'] = geneRanked['RP_SCORE'].astype(float)
     geneRanked['node_size'] = geneRanked['RP_SCORE'] *4
+    geneRanked['RP_SCORE'] = geneRanked['RP_SCORE'].round(0)
+    geneRanked['node_size'] = geneRanked['node_size'].round(0)
     st.write(geneRanked)
     for gene_idx in range(0,geneRanked.shape[0]):
         gene = geneRanked.iloc[gene_idx,]
@@ -804,8 +777,6 @@ with tab5:
     #G.add_edges_from(PPI)
     #pos=run_force_layout(G)
     
-    
-    
     #SampleNameButton = st.radio(
     #     "selected sample",
     #     sampleNames,key='network')
@@ -826,6 +797,10 @@ with tab5:
        )
     st.write("Sample:"+fileName)
     #deg_results=deg[1]
+    res_pd_filter['scores'] = res_pd_filter['scores'].astype('float')
+    res_pd_filter['scores'] = res_pd_filter['scores'].round(2)
+    res_pd_filter['logfoldchanges'] = res_pd_filter['logfoldchanges'].astype('float')
+    res_pd_filter['logfoldchanges'] = res_pd_filter['logfoldchanges'].round(2)
     deg_results = res_pd_filter
     st.write(res_pd_filter)
     
@@ -840,6 +815,8 @@ with tab5:
     expInNetworkArrSorted = np.array(sorted(expInNetworkArr,key = lambda expInNetworkArr:np.float64(expInNetworkArr[1]), reverse=True))
     DataE=pd.DataFrame(expInNetworkArrSorted)
     DataE.rename(columns={0:'symbol',1:'log2FC'},inplace=True)
+    DataE['log2FC'] = DataE['log2FC'].astype('float')
+    DataE['log2FC'] = DataE['log2FC'].round(2)
     st.write(DataE)
     
     ### show expression figure ###
