@@ -222,7 +222,7 @@ def load_h5ad_file(workingdir):
 
 # Call PAGER REST API to perform hypergeometric test and return enriched PAGs associated with given list of genes as a data frame.
 # See pathFun() in PAGER R SDK at https://uab.app.box.com/file/529139337869.
-@st.cache(allow_output_mutation=True)
+#@st.cache(allow_output_mutation=True)
 def run_pager(genes, sources, olap, sim, fdr):
 	# Set up the call parameters as a dict.
 	params = {}
