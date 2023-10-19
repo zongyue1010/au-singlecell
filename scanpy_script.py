@@ -370,7 +370,7 @@ with tab1:
         submit_button1 = st.form_submit_button("Plot!") #,on_click=trigger(step1_)
     if submit_button1:
         st.session_state['method'] = method
-        st.session_state['sel_cluster'] = sel_cluster     
+        st.session_state['sel_cluster'] = tuple(sel_cluster)     
         adata_merge_filtered = adata_merge[adata_merge.obs[adata_merge.obs.leiden.isin(sel_cluster)].index]
         st.session_state['adata_merge_filtered'] = adata_merge_filtered
     
@@ -423,15 +423,18 @@ with tab2:
 # return the cluster comparison using the differentially expressed gene analysis 
 
 def compute_DEG(cluster_name,selected_cluster,referece_cluster):
+    adata_merge_filtered= st.session_state['adata_merge_filtered']
+    #st.write(selected_cluster)
+    #st.write(referece_cluster)
     sc.tl.rank_genes_groups(adata_merge_filtered, cluster_name, groups=[str(selected_cluster)],reference=str(referece_cluster),
                             method='wilcoxon',key_added = "wilcoxon")
     st.session_state['adata_merge_filtered'] = adata_merge_filtered
     
-@st.cache(allow_output_mutation=True)    
+#@st.cache(allow_output_mutation=True)    
 def get_wilcoxon_result(adata_merge_filtered,selected_cluster):
     res_pd = pd.DataFrame()
     method_name = 'wilcoxon'
-    #st.table(pd.DataFrame(adata_merge_filtered.uns['rank_genes_groups']['names']))
+    #st.write(pd.DataFrame(adata_merge_filtered.uns[method_name]))
     res_pd['names'] = pd.DataFrame(adata_merge_filtered.uns[method_name]['names'])[str(selected_cluster)].values#.str.decode('utf-8') 
     res_pd['scores'] = pd.DataFrame(adata_merge_filtered.uns[method_name]['scores'])[str(selected_cluster)].values
     res_pd['logfoldchanges'] = pd.DataFrame(adata_merge_filtered.uns[method_name]['logfoldchanges'])[str(selected_cluster)].values
@@ -464,7 +467,7 @@ with tab3:
     )
     referece_cluster = st.selectbox('Reference cluster',
         tuple([int(leiden_idx) for leiden_idx in sel_cluster if leiden_idx!=str(selected_cluster)] + ['rest']),  
-        (leiden_max-1),#(len(sel_cluster)),#
+        (len(sel_cluster)-1),#(len(sel_cluster)),#
         key="referece_box"
     )      
     button3 = st.button("Perform wilcoxon analysis!") # data_btn = st.button("Perform wilcoxon analysis")
@@ -476,21 +479,32 @@ with tab3:
         st.session_state['fileName'] = fileName     
         compute_DEG(cluster_name,st.session_state['selected_cluster'],st.session_state['referece_cluster'])
     elif method_name not in st.session_state['adata_merge_filtered'].uns.keys():
+        #st.write("no method")
         # initiate the parameters #
-        st.session_state['selected_cluster'] = int(sel_cluster[0]) if 'selected_cluster' not in st.session_state.keys() else st.session_state['selected_cluster']  
-        st.session_state['referece_cluster'] = 'rest' if 'referece_cluster' not in st.session_state.keys() else st.session_state['referece_cluster']        
-        compute_DEG(cluster_name,st.session_state['selected_cluster'],st.session_state['referece_cluster'])
-    else:
-        print('')
+        st.session_state['selected_cluster'] = selected_cluster if 'selected_cluster' not in st.session_state.keys() else st.session_state['selected_cluster']
+        #st.write(selected_cluster)
+        #st.write(sel_cluster)
+        #st.write(referece_cluster)
+        if 'referece_cluster' not in st.session_state.keys():
+            if len(sel_cluster)==2:
+                st.session_state['referece_cluster'] = st.session_state['sel_cluster'][-1]
+            elif len(sel_cluster)==1:
+                st.write("Please select at least 2 clusters in the step 1 to perform the differentially expressed gene analysis.")
+            else:
+                st.session_state['referece_cluster'] = 'rest'         
+        else:
+            print('')
+        compute_DEG(cluster_name,selected_cluster,referece_cluster)
+    elif method_name in st.session_state['adata_merge_filtered'].uns.keys():
+        #st.write("have method")
+        if (str(selected_cluster) not in pd.DataFrame(adata_merge_filtered.uns[method_name]['names']).keys()):
+            compute_DEG(cluster_name,selected_cluster,referece_cluster)
+            
     #else:
     #    compute_DEG(cluster_name,st.session_state['selected_cluster'],st.session_state['referece_cluster'])
         
-    # initiate the parameters #
-    st.session_state['selected_cluster'] = int(sel_cluster[0]) if 'selected_cluster' not in st.session_state.keys() else st.session_state['selected_cluster']
-    st.session_state['referece_cluster'] = 'rest' if 'referece_cluster' not in st.session_state.keys() else st.session_state['referece_cluster']
-    st.session_state['fileName'] = 'c'+str(st.session_state['selected_cluster'])+'_vs_'+'c'+str(st.session_state['referece_cluster'])
-
-    fileName = 'c'+str(st.session_state['selected_cluster'])+'_vs_'+'c'+str(st.session_state['referece_cluster'])
+    # initiate the parameters #s
+    st.session_state['fileName'] = fileName = 'c'+str(selected_cluster)+'_vs_'+'c'+str(referece_cluster)
 
     #if data_btn == True or (str(selected_cluster) in pd.DataFrame(adata_merge_filtered.uns[method_name]['names']).keys()):
     #    if((str(selected_cluster) in pd.DataFrame(adata_merge_filtered.uns[method_name]['names']).keys())):
@@ -506,7 +520,7 @@ with tab3:
     #    st.write("Please click the \"Perform wilcoxon analysis\" botton for the data processing.")
     #    st.stop()
     
-    res_pd = get_wilcoxon_result(st.session_state['adata_merge_filtered'],st.session_state['selected_cluster'])
+    res_pd = get_wilcoxon_result(st.session_state['adata_merge_filtered'],selected_cluster)
     with st.form("formStep3_2"):    
         score_max = int(np.floor(max(res_pd['scores'].values)))
         score_min = int(np.floor(min(res_pd['scores'].values)))
@@ -737,14 +751,17 @@ with tab5:
     res_pd_filter = st.session_state['res_pd_filter']
     fileName = st.session_state['fileName']
     sel_cluster = st.session_state['sel_cluster']
-    
+
     st.write('Select a PAG_ID here:')
     #st.write(pag_ids)
     PAGid = st.selectbox(
         'Available PAG_IDs',
         tuple(pag_ids),
         key = "PAG_ID_box"
-        )
+    )
+
+         
+    
     #st.write(PAGid)
     
     ID_only = re.sub("([A-Z0-9]+)_[^_]*","\\1",str(PAGid))
@@ -891,10 +908,17 @@ with tab5:
         #edges = [Edge(source=i, label="int", target=j,color="#d3d3d3") for (i,j) in X.edges] # includes **kwargs  type="CURVE_SMOOTH"
         #st.write(PPI)
         edges = [Edge(source=pair[0], label='', target=pair[1],color="#d3d3d3") for pair in PPI]
-        
-        return_value = agraph(nodes=nodes, 
-                      edges=edges, 
-                      config=config)
+        if len(nodes) <= 50:
+            return_value = agraph(nodes=nodes, 
+                          edges=edges, 
+                          config=config)
+        else:
+            st.write("The network consists of over 50 genes, which reduces the performance. Do you want to still process?")
+            buttonprocess= st.button("Process!")
+            if buttonprocess:
+                return_value = agraph(nodes=nodes, 
+                          edges=edges, 
+                          config=config)                    
         #agraph(list(idx2symbol.values()), (PPI), config)
         st.markdown(get_table_download_link(pd.DataFrame(PPI), fileName = ' '+fileName+' '+str(PAGid)+' data for interactions'), unsafe_allow_html=True)
         st.markdown(get_table_download_link(pd.DataFrame(DataE), fileName = ' '+fileName+' '+str(PAGid)+' data for gene expressions'), unsafe_allow_html=True)
