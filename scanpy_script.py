@@ -18,6 +18,10 @@ import math
 import scanpy as sc
 import glob
 import anndata
+from PIL import Image
+
+
+
 
 ### coloring library ###
 # color mapping of the gene expression #
@@ -150,6 +154,14 @@ newcmp = ListedColormap(newcolors, name='RedBlue')
 hex_map = [matplotlib.colors.to_hex(i, keep_alpha=True) for i in newcolors]
 
 ### user interface ###
+def add_logo(logo_path, width, height):
+    """Read and return a resized logo"""
+    logo = Image.open(logo_path)
+    modified_logo = logo.resize((width, height))
+    return modified_logo
+    
+# Title of the main page
+st.image(add_logo(logo_path="./aipharm_logo.png", width=400, height=100)) 
 st.title('PAGER-scFGA: an online interactive single-cell functional genomics analysis platform')
 st.header('An case study of natural killer cell functional maturation and differentiation')
 
