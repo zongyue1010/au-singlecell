@@ -249,13 +249,13 @@ def run_pager(genes, sources, olap, sim, fdr):
 # gene network in PAG
 #@st.cache(allow_output_mutation=True)
 def run_pager_int(PAGid):
-	response = requests.get('http://discovery.informatics.uab.edu/PAGER/index.php/pag_mol_mol_map/interactions/'+PAGid)
+	response = requests.get('http://discovery.informatics.uab.edu/PAGER/index.php/pag_mol_mol_map/interactions/'+str(PAGid))
 	return pd.DataFrame(response.json())
 
 # pag_ranked_gene in PAG
 #@st.cache(allow_output_mutation=True)
 def pag_ranked_gene(PAGid):
-	response = requests.get('http://discovery.informatics.uab.edu/PAGER/index.php/genesinPAG/viewgenes/'+PAGid)
+	response = requests.get('http://discovery.informatics.uab.edu/PAGER/index.php/genesinPAG/viewgenes/'+str(PAGid))
 	return pd.DataFrame(response.json()['gene'])
 
 # generate force layout
@@ -617,10 +617,10 @@ with tab4:
 
     #pager_run_state = st.text('Calling PAGER REST API ... ')
     if len(genes) != 0:
-        st.write(st.session_state['sources'])
-        st.write(st.session_state['olap'])
-        st.write(st.session_state['sim'])
-        st.write(st.session_state['fdr'])
+        #st.write(st.session_state['sources'])
+        #st.write(st.session_state['olap'])
+        #st.write(st.session_state['sim'])
+        #st.write(st.session_state['fdr'])
         pager_output = run_pager(genes, st.session_state['sources'], st.session_state['olap'], st.session_state['sim'], st.session_state['fdr'])
         #pager_run_state.text('Calling PAGER REST API ... done!')
         #st.write(pager_output)
@@ -707,7 +707,7 @@ with tab4:
 #st.pyplot(caption='Sample-PAG association')
 
 ### generate PPI data ###
-@st.cache(allow_output_mutation=True)
+#@st.cache(allow_output_mutation=True)
 def PPIgeneration(geneInt,symbol2idx):      
     idxPair=[]
     PPI=[]
