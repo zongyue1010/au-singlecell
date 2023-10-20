@@ -161,7 +161,7 @@ def add_logo(logo_path, width, height):
 # Title of the main page
 st.image(add_logo(logo_path="./aipharm_logo.png", width=400, height=100)) 
 st.title('PAGER-scFGA: an online interactive single-cell functional genomics analysis platform')
-st.header('An case study of natural killer cell functional maturation and differentiation')
+st.header('A case study of natural killer cell functional maturation and differentiation')
 
 #################
 ### side manu ###
