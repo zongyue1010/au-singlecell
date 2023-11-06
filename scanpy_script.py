@@ -442,9 +442,12 @@ def get_wilcoxon_result(adata_merge_filtered,selected_cluster):
 
 # return the filtered gene list dataframe
 @st.cache(allow_output_mutation=True)
-def marker_filter(res_pd,user_score_min, user_score_max,user_lf_min, user_lf_max):   
-    res_pd_filter = res_pd[((res_pd['scores']<user_score_min) | (res_pd['scores']>user_score_max)) 
-                           & ((res_pd['logfoldchanges']<user_lf_min) | (res_pd['logfoldchanges']>user_lf_max))]
+def marker_filter(res_pd,user_score_min, user_score_max,user_lf_min, user_lf_max,pvals_adj):   
+    res_pd_filter = res_pd[
+        ((res_pd['scores']<user_score_min) | (res_pd['scores']>user_score_max)) 
+        & ((res_pd['logfoldchanges']<user_lf_min) | (res_pd['logfoldchanges']>user_lf_max))
+        & (res_pd['pvals_adj']<=pvals_adj)
+    ]
     res_pd_filter = res_pd_filter.sort_values(['scores','logfoldchanges'],ascending=False)
     res_pd_filter = res_pd_filter.reset_index(drop=True)
     return(res_pd_filter)
@@ -503,6 +506,7 @@ with tab3:
         score_min = int(np.floor(min(res_pd['scores'].values)))
         lf_max = int(np.floor(max(res_pd['logfoldchanges'].values)))
         lf_min = int(np.floor(min(res_pd['logfoldchanges'].values)))
+
         
         st.markdown("Scores and log foldchange cutoff.")
         user_score_min, user_score_max = st.slider('scores', 
@@ -513,25 +517,28 @@ with tab3:
                                        max_value=float(lf_max), 
                                        min_value=float(lf_min),
                                        value=(-1.0, 1.0))
-        
+        user_adj_p_value = st.number_input('adjusted p-value',min_value=0.0, max_value=1.0,value=0.05)
         submit_button3_2 = st.form_submit_button("Filter!") 
     if submit_button3_2:
         st.session_state['user_score_min'] = user_score_min
         st.session_state['user_score_max'] = user_score_max
         st.session_state['user_lf_min'] = user_lf_min
         st.session_state['user_lf_max'] = user_lf_max
+        st.session_state['user_adj_p_value'] = user_adj_p_value
     # initiate the parameters #
     st.session_state['user_score_min'] = -3 if 'user_score_min' not in st.session_state.keys() else st.session_state['user_score_min']
     st.session_state['user_score_max'] = 3 if 'user_score_max' not in st.session_state.keys() else st.session_state['user_score_max']
     st.session_state['user_lf_min'] = -1.0 if 'user_lf_min' not in st.session_state.keys() else st.session_state['user_lf_min']
     st.session_state['user_lf_max'] = 1.0 if 'user_lf_max' not in st.session_state.keys() else st.session_state['user_lf_max']
-
+    st.session_state['user_adj_p_value'] = 0.05 if 'user_adj_p_value' not in st.session_state.keys() else st.session_state['user_adj_p_value']
     #if str(selected_cluster) in pd.DataFrame(st.session_state['adata_merge_filtered'].uns[method_name]['names']).keys(): 
     
-    res_pd_filter = marker_filter(res_pd,st.session_state['user_score_min'], st.session_state['user_score_max'],st.session_state['user_lf_min'], st.session_state['user_lf_max'])  
+    res_pd_filter = marker_filter(res_pd,st.session_state['user_score_min'], st.session_state['user_score_max'],st.session_state['user_lf_min'], st.session_state['user_lf_max'],st.session_state['user_adj_p_value'])
+    res_pd_filter['logfoldchanges'] = res_pd_filter['logfoldchanges'].round(2)
+    res_pd_filter['scores'] = res_pd_filter['scores'].round(2)
     st.session_state['res_pd_filter'] = res_pd_filter
     ### show table ###
-    st.subheader(fileName+" differetially expressed genes sorted by scores (-log(p-value)*Fold Change).")
+    st.subheader(fileName+" differetially expressed genes sorted by scores (the z-score underlying the computation of a p-value for each gene for each group).")
     st.write(st.session_state['res_pd_filter'])
     st.markdown(get_table_download_link(pd.DataFrame(st.session_state['res_pd_filter']), fileName = fileName+'_DEG list result'), unsafe_allow_html=True)
     
@@ -906,7 +913,7 @@ with tab5:
 
 # Add a footer
 st.header('Cite us:')
-st.markdown(f"\n*Zongliang Yue\*, Robert S. Welner, and Jake Chen*, PAGER-scFGA: Unveiling Natural Killer Cell Functional Maturation and Differentiation through Single-Cell Functional Genomics Analysis, under review.")
+st.markdown(f"\n*Zongliang Yue\*, Fengyuan Huang, Robert S. Welner, and Jake Chen*, PAGER-scFGA: Unveiling Natural Killer Cell Functional Maturation and Differentiation through Single-Cell Functional Genomics Analysis, under review.")
 st.markdown(f"PAGER analysis:\nZongliang Yue, Qi Zheng, Michael T Neylon, Minjae Yoo, Jimin Shin, Zhiying Zhao, Aik Choon Tan, Jake Y Chen, PAGER 2.0: an update to the pathway, annotated-list and gene-signature electronic repository for Human Network Biology, Nucleic Acids Research, Volume 46, Issue D1, 4 January 2018, Pages D668–D676,https://doi.org/10.1093/nar/gkx1040\n")
 st.markdown("http://discovery.informatics.uab.edu/PAGER/")
 st.markdown(f"Protein-Protein Interactions (PPIs) in network construction:\nJake Y. Chen, Ragini Pandey, and Thanh M. Nguyen, (2017) HAPPI-2: a Comprehensive and High-quality Map of Human Annotated and Predicted Protein Interactions, BMC Genomics volume 18, Article number: 182")
