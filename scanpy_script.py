@@ -173,7 +173,7 @@ workingdir = st.sidebar.selectbox(
     'select a pre-processed single cell dataset:',
     tuple(['mouse_NK']),key='workingdir'
     )
-link = "1.mouse_NK is natural killer cells from mouse samples. (confidential)"
+link = "1.mouse_NK is natural killer cells from mouse samples. Single cells were obtained from mouse bone marrow, blood, and spleen tissues. The isolation of mouse natural killer (mNK) cells was carried out using the CITE-seq (Cellular Indexing of Transcriptomes and Epitopes by Sequencing)"
 st.sidebar.markdown(link, unsafe_allow_html=True)
 st.sidebar.markdown('You selected `%s`' % workingdir)
 
