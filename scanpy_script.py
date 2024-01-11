@@ -897,12 +897,12 @@ with tab5:
                           edges=edges, 
                           config=config)
         else:
-            st.write("The network consists of over 50 genes, which reduces the performance. Do you want to still process?")
-            buttonprocess= st.button("Process!")
-            if buttonprocess:
-                return_value = agraph(nodes=nodes, 
-                          edges=edges, 
-                          config=config)                    
+            st.write("The network consists of over 50 genes, which reduces the performance. You can still download the protein-protein interaction data and gene expression data for generating the results using Cytoscape (https://cytoscape.org/) or Gephi (https://gephi.org/)")
+            #buttonprocess= st.button("Process!")
+            #if buttonprocess:
+            #    return_value = agraph(nodes=nodes, 
+            #              edges=edges, 
+            #              config=config)                    
         #agraph(list(idx2symbol.values()), (PPI), config)
         st.markdown(get_table_download_link(pd.DataFrame(PPI), fileName = ' '+fileName+' '+str(PAGid)+' data for interactions'), unsafe_allow_html=True)
         st.markdown(get_table_download_link(pd.DataFrame(DataE), fileName = ' '+fileName+' '+str(PAGid)+' data for gene expressions'), unsafe_allow_html=True)
