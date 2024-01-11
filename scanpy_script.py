@@ -181,7 +181,7 @@ st.sidebar.markdown('You selected `%s`' % workingdir)
 
 ### functions ###
 # get download link
-#@st.cache(allow_output_mutation=True)
+#@st.cache_data(allow_output_mutation=True)
 def get_table_download_link(df, **kwargs):
     """Generates a link allowing the data in a given panda dataframe to be downloaded
     in:  dataframe
@@ -208,7 +208,7 @@ def load_files(file_list):
             st.session_state['adata_merge'] = anndata.concat([st.session_state['adata_merge'],adata],index_unique=None)
             i += 1
         del(adata)
-        print(i)
+        #print(i)
     return(st.session_state['adata_merge'])
 def chunk_array(arr, chunk_size):
     for i in range(0, len(arr), chunk_size):
@@ -216,7 +216,7 @@ def chunk_array(arr, chunk_size):
 
 
 # Return GBM treatment data as a data frame.
-#@st.cache(allow_output_mutation=True)
+#@st.cache_data(allow_output_mutation=True)
 def load_h5ad_file(workingdir):
     #df = pd.read_csv('SampleTreatment.txt',sep="\t")
     #adata_merge = sc.read_h5ad('input/'+workingdir+'/'+'scanpy_adata_merge_15249_unregress.h5ad')
@@ -232,7 +232,7 @@ def load_h5ad_file(workingdir):
 
 # Call PAGER REST API to perform hypergeometric test and return enriched PAGs associated with given list of genes as a data frame.
 # See pathFun() in PAGER R SDK at https://uab.app.box.com/file/529139337869.
-#@st.cache(allow_output_mutation=True)
+#@st.cache_data(allow_output_mutation=True)
 def run_pager(genes, sources, olap, sim, fdr):
     # Set up the call parameters as a dict.
     params = {}
@@ -263,19 +263,19 @@ def run_pager(genes, sources, olap, sim, fdr):
     return(response_pd)
 
 # gene network in PAG
-#@st.cache(allow_output_mutation=True)
+#@st.cache_data(allow_output_mutation=True)
 def run_pager_int(PAGid):
 	response = requests.get('http://discovery.informatics.uab.edu/PAGER/index.php/pag_mol_mol_map/interactions/'+str(PAGid))
 	return pd.DataFrame(response.json())
 
 # pag_ranked_gene in PAG
-#@st.cache(allow_output_mutation=True)
+#@st.cache_data(allow_output_mutation=True)
 def pag_ranked_gene(PAGid):
 	response = requests.get('http://discovery.informatics.uab.edu/PAGER/index.php/genesinPAG/viewgenes/'+str(PAGid))
 	return pd.DataFrame(response.json()['gene'])
 
 # generate force layout
-#@st.cache(allow_output_mutation=True)
+#@st.cache_data(allow_output_mutation=True)
 def run_force_layout(G):
     pos=nx.spring_layout(G, dim=2, k=None, pos=None, fixed=None, iterations=50, weight='weight', scale=1.0)
     return(pos)
@@ -441,7 +441,7 @@ def get_wilcoxon_result(adata_merge_filtered,selected_cluster):
     return(res_pd)
 
 # return the filtered gene list dataframe
-@st.cache(allow_output_mutation=True)
+@st.cache_data() #allow_output_mutation=True
 def marker_filter(res_pd,user_score_min, user_score_max,user_lf_min, user_lf_max,pvals_adj):   
     res_pd_filter = res_pd[
         ((res_pd['scores']<user_score_min) | (res_pd['scores']>user_score_max)) 
@@ -713,7 +713,7 @@ with tab4:
 #st.pyplot(caption='Sample-PAG association')
 
 ### generate PPI data ###
-#@st.cache(allow_output_mutation=True)
+#@st.cache_data(allow_output_mutation=True)
 def PPIgeneration(geneInt,symbol2idx):      
     idxPair=[]
     PPI=[]
@@ -836,7 +836,7 @@ with tab5:
     sc.tl.dendrogram(adata_merge_filtered,groupby="leiden")
     if option == 'dotplot':      
         dp = sc.pl.dotplot(adata_merge_filtered, marker_genes.values, groupby='leiden', return_fig=True) # ,categories_order=sel_cluster
-        st.pyplot(dp.add_totals().style(dot_edge_color='black', dot_edge_lw=0.5).show()) # , cmap='viridis'
+        st.pyplot(dp.add_totals().style(dot_edge_color='black', dot_edge_lw=0.5,cmap="viridis").show()) # , cmap='viridis'
     elif option == 'heatmap':
         sc.tl.dendrogram(adata_merge_filtered,groupby="leiden")
         st.pyplot(sc.pl.heatmap(adata_merge_filtered, marker_genes.values, groupby='leiden', swap_axes=True,cmap="viridis"))
