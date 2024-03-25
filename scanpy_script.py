@@ -730,7 +730,7 @@ def get_PPI_STRING(genes):
     
     ## Set parameters
     if(len(genes)!=0):
-        params['identifiers'] = "\r".join(genes), # your protein list
+        params['identifiers'] = "\r".join(genes) # your protein list
     else:
         params['identifiers'] = ''
     params["species"] = 9606 # species NCBI identifier 
@@ -812,6 +812,7 @@ with tab5:
             symbol2size[gene['GENE_SYM']] = 1
         idx2symbol[str(idx)] = gene['GENE_SYM']
         idx+=1
+        
     if PPIsource == 'STRING':
         geneIntString = get_PPI_STRING(geneRanked['GENE_SYM'])
         geneIntString = geneIntString[geneIntString.score>=0.7]
