@@ -252,7 +252,7 @@ def run_pager(genes, sources, olap, sim, fdr):
     params['FDR'] = np.float64(fdr)
     params['ge'] = 1
     params['le'] = 2000
-    response = requests.post('http://discovery.informatics.uab.edu/PAGER/index.php/geneset/pagerapi',data=params)
+    response = requests.post('https://discovery.informatics.uab.edu/PAGER/index.php/geneset/pagerapi',data=params)
     response_pd=pd.DataFrame(response.json())
     response_pd.rename(columns={'COCO_V2': 'nCoCo','SIMILARITY_SCORE':'SIMILARITY'}, inplace=True)
     response_pd['nCoCo'] = response_pd['nCoCo'].str.extract(r'([\d]*).[\d]+')
@@ -265,13 +265,13 @@ def run_pager(genes, sources, olap, sim, fdr):
 # gene network in PAG
 #@st.cache_data(allow_output_mutation=True)
 def run_pager_int(PAGid):
-	response = requests.get('http://discovery.informatics.uab.edu/PAGER/index.php/pag_mol_mol_map/interactions/'+str(PAGid))
+	response = requests.get('https://discovery.informatics.uab.edu/PAGER/index.php/pag_mol_mol_map/interactions/'+str(PAGid))
 	return pd.DataFrame(response.json())
 
 # pag_ranked_gene in PAG
 #@st.cache_data(allow_output_mutation=True)
 def pag_ranked_gene(PAGid):
-	response = requests.get('http://discovery.informatics.uab.edu/PAGER/index.php/genesinPAG/viewgenes/'+str(PAGid))
+	response = requests.get('https://discovery.informatics.uab.edu/PAGER/index.php/genesinPAG/viewgenes/'+str(PAGid))
 	return pd.DataFrame(response.json()['gene'])
 
 # generate force layout
@@ -599,7 +599,7 @@ with tab4:
         
         st.subheader('Adjust PAGER Parameters')
         
-        link = 'The PAGER database detail [http://discovery.informatics.uab.edu/PAGER/](http://discovery.informatics.uab.edu/PAGER/)'
+        link = 'The PAGER database detail [https://discovery.informatics.uab.edu/PAGER/](http://discovery.informatics.uab.edu/PAGER/)'
         st.markdown(link, unsafe_allow_html=True)
         
         sources = st.multiselect('Available Data Sources',
@@ -743,7 +743,7 @@ with tab5:
     #st.write(PAGid)
     
     ID_only = re.sub("([A-Z0-9]+)_[^_]*","\\1",str(PAGid))
-    link = "For the selected PAG "+ str(PAGid)+"'s gene information. (http://discovery.informatics.uab.edu/PAGER/index.php/geneset/view/"+ID_only+")"
+    link = "For the selected PAG "+ str(PAGid)+"'s gene information. (https://discovery.informatics.uab.edu/PAGER/index.php/geneset/view/"+ID_only+")"
     st.markdown(link, unsafe_allow_html=True)
     
     geneInt = run_pager_int(ID_only)
@@ -913,11 +913,11 @@ with tab5:
 
 # Add a footer
 st.header('Cite us:')
-st.markdown(f"\n*Zongliang Yue\*, Fengyuan Huang, Robert S. Welner, and Jake Chen*, PAGER-scFGA: Unveiling Natural Killer Cell Functional Maturation and Differentiation through Single-Cell Functional Genomics Analysis, under review.")
+st.markdown(f"\n* Fengyuan Huang, Robert S. Welner, Jake Chen*, and Zongliang Yue*, PAGER-scFGA: Unveiling Natural Killer Cell Functional Maturation and Differentiation through Single-Cell Functional Genomics Analysis, under review.")
 st.markdown(f"PAGER analysis:\nZongliang Yue, Qi Zheng, Michael T Neylon, Minjae Yoo, Jimin Shin, Zhiying Zhao, Aik Choon Tan, Jake Y Chen, PAGER 2.0: an update to the pathway, annotated-list and gene-signature electronic repository for Human Network Biology, Nucleic Acids Research, Volume 46, Issue D1, 4 January 2018, Pages D668–D676,https://doi.org/10.1093/nar/gkx1040\n")
-st.markdown("http://discovery.informatics.uab.edu/PAGER/")
+st.markdown("https://discovery.informatics.uab.edu/PAGER/")
 st.markdown(f"Protein-Protein Interactions (PPIs) in network construction:\nJake Y. Chen, Ragini Pandey, and Thanh M. Nguyen, (2017) HAPPI-2: a Comprehensive and High-quality Map of Human Annotated and Predicted Protein Interactions, BMC Genomics volume 18, Article number: 182")
-st.markdown("http://discovery.informatics.uab.edu/HAPPI/")        
+st.markdown("https://discovery.informatics.uab.edu/HAPPI/")        
     
 st.header('About us:')
 st.write(f"If you have questions or comments about the database contents or technical support,, please email Dr. Zongliang Yue, zzy0065@auburn.edu")
