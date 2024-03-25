@@ -723,6 +723,40 @@ def PPIgeneration(geneInt,symbol2idx):
         
     return(idxPair,PPI,idx2symbol)
 
+def get_PPI_STRING(genes):
+    string_api_url = "https://version-11-5.string-db.org/api"
+    output_format = "json"#"tsv-no-header"
+    method = "network"
+    
+    ## Set parameters
+    if(len(genes)!=0):
+        params['identifiers'] = "\r".join(genes), # your protein list
+    else:
+        params['identifiers'] = ''
+    params["species"] = 9606 # species NCBI identifier 
+    params["limit"] = 1 # only one (best) identifier per input protein
+    params["echo_query"] = 1 # see your input identifiers in the output
+    params["caller_identity"] = "www.awesome_app.org" # your app name
+
+    ## Construct URL
+    request_url = "/".join([string_api_url, output_format, method])
+    
+    ## Call STRING
+    results = requests.post(request_url, data=params)
+    return(pd.DataFrame(results.json()))
+    
+### gene network of selected PAG using STRING ###
+def STRING_PPIgeneration(geneInt,symbol2idx):      
+    idxPair=[]
+    PPI=[]
+    for idx in range(0,geneInt.shape[0]):
+        pair = geneInt.iloc[idx,]
+        if (pair['preferredName_A'] in symbol2idx.keys()) & (pair['preferredName_B'] in symbol2idx.keys()):
+            idxPair.append((symbol2idx[pair['preferredName_A']],symbol2idx[pair['preferredName_B']]))
+            PPI.append((pair['preferredName_A'],pair['preferredName_B']))     
+    return(idxPair,PPI,idx2symbol)
+
+
 with tab5:    
     st.header('Section 5: Generate the network of the selected PAG')
     PAGERSet = st.session_state['PAGERSet']
@@ -739,14 +773,20 @@ with tab5:
         tuple(pag_ids),
         key = "PAG_ID_box"
     )
-  
+    st.write('Select PPI source:')
+    #st.write(pag_ids)
+    PPIsource = st.selectbox(
+        'PPI source',
+        tuple(['HAPPI','STRING']),
+        key = "PPI_SOURCE"
+    )  
     #st.write(PAGid)
     
     ID_only = re.sub("([A-Z0-9]+)_[^_]*","\\1",str(PAGid))
     link = "For the selected PAG "+ str(PAGid)+"'s gene information. (https://discovery.informatics.uab.edu/PAGER/index.php/geneset/view/"+ID_only+")"
     st.markdown(link, unsafe_allow_html=True)
     
-    geneInt = run_pager_int(ID_only)
+    
     geneRanked = pag_ranked_gene(ID_only)
     #st.write(geneRanked)
     
@@ -772,8 +812,13 @@ with tab5:
             symbol2size[gene['GENE_SYM']] = 1
         idx2symbol[str(idx)] = gene['GENE_SYM']
         idx+=1
-    
-    (idxPair,PPI,idx2symbol) = PPIgeneration(geneInt,symbol2idx)
+    if PPIsource == 'STRING':
+        geneIntString = get_PPI_STRING(geneRanked['GENE_SYM'])
+        geneIntString = geneIntString[geneIntString.score>=0.7]
+        (idxPair,PPI,idx2symbol) = STRING_PPIgeneration(geneIntString,symbol2idx)
+    elif PPIsource == 'HAPPI':
+        geneInt = run_pager_int(ID_only)
+        (idxPair,PPI,idx2symbol) = PPIgeneration(geneInt,symbol2idx)
     
     #st.write(PPI)
     
@@ -920,8 +965,8 @@ st.markdown(f"Protein-Protein Interactions (PPIs) in network construction:\nJake
 st.markdown("https://discovery.informatics.uab.edu/HAPPI/")        
     
 st.header('About us:')
-st.write(f"If you have questions or comments about the database contents or technical support,, please email Dr. Zongliang Yue, zzy0065@auburn.edu")
-st.write("Our Research group: AI.pharm, Auburn University, Auburn, USA. https://github.com/ai-pharm-AU")
+st.write(f"If you have questions or comments about the database contents or technical support, please email Dr. Zongliang Yue, zzy0065@auburn.edu")
+st.write("Our Research group: AI.pharm, Health Outcome Research and Policy, Harrison College of Pharmacy, Auburn University, Auburn, USA. https://github.com/ai-pharm-AU")
 ##for idx in range(0,len(degs)):
 ##    deg=degs[idx]
 ##    sampleName=deg[0]
