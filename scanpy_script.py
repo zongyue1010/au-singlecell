@@ -817,10 +817,11 @@ with tab5:
         geneIntString = get_PPI_STRING(geneRanked['GENE_SYM'])
         geneIntString = geneIntString[geneIntString.score>=0.7]
         (idxPair,PPI,idx2symbol) = STRING_PPIgeneration(geneIntString,symbol2idx)
+        st.write("The network utilized a threshold of 0.7 for the STRING's PPI score.")
     elif PPIsource == 'HAPPI':
         geneInt = run_pager_int(ID_only)
         (idxPair,PPI,idx2symbol) = PPIgeneration(geneInt,symbol2idx)
-    
+        st.write("The network utilized a threshold of 0.45 for the HAPPI's PPI score.")
     #st.write(PPI)
     
     # spring force layout in networkx
