@@ -727,10 +727,10 @@ def get_PPI_STRING(genes):
     string_api_url = "https://version-11-5.string-db.org/api"
     output_format = "json"#"tsv-no-header"
     method = "network"
-    
+    params = {}
     ## Set parameters
     if(len(genes)!=0):
-        params['identifiers'] = "\r".join(genes) # your protein list
+        params['identifiers'] = '\r'.join(genes) # your protein list
     else:
         params['identifiers'] = ''
     params["species"] = 9606 # species NCBI identifier 
