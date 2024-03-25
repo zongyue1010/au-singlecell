@@ -779,7 +779,11 @@ with tab5:
         'PPI source',
         tuple(['HAPPI','STRING']),
         key = "PPI_SOURCE"
-    )  
+    )
+    if PPIsource == 'STRING':
+        st.write("The network utilized a threshold of 0.7 for the STRING's PPI score.")
+    elif PPIsource == 'HAPPI':
+        st.write("The network utilized a threshold of 0.45 for the HAPPI's PPI score.")
     #st.write(PAGid)
     
     ID_only = re.sub("([A-Z0-9]+)_[^_]*","\\1",str(PAGid))
@@ -816,12 +820,11 @@ with tab5:
     if PPIsource == 'STRING':
         geneIntString = get_PPI_STRING(geneRanked['GENE_SYM'])
         geneIntString = geneIntString[geneIntString.score>=0.7]
-        (idxPair,PPI,idx2symbol) = STRING_PPIgeneration(geneIntString,symbol2idx)
-        st.write("The network utilized a threshold of 0.7 for the STRING's PPI score.")
+        (idxPair,PPI,idx2symbol) = STRING_PPIgeneration(geneIntString,symbol2idx)       
     elif PPIsource == 'HAPPI':
         geneInt = run_pager_int(ID_only)
         (idxPair,PPI,idx2symbol) = PPIgeneration(geneInt,symbol2idx)
-        st.write("The network utilized a threshold of 0.45 for the HAPPI's PPI score.")
+        
     #st.write(PPI)
     
     # spring force layout in networkx
