@@ -20,6 +20,7 @@ import glob
 import anndata
 from PIL import Image
 pd.set_option("display.precision", 2)
+import gc
 
 import logging
 # Suppress Streamlit warning messages
@@ -386,11 +387,13 @@ with tab1:
         st.session_state['sel_cluster'] = tuple(sel_cluster)     
         adata_merge_filtered = adata_merge[adata_merge.obs[adata_merge.obs.leiden.isin(sel_cluster)].index]
         st.session_state['adata_merge_filtered'] = adata_merge_filtered
-    
+        del(adata_merge_filtered)
+        
     # initiate the parameters #
     st.session_state['method'] = "tSNE" if 'method' not in st.session_state.keys() else st.session_state['method']
     st.session_state['sel_cluster'] = tuple([str(leiden_idx) for leiden_idx in list(range(0,leiden_max))]) if 'sel_cluster' not in st.session_state.keys() else st.session_state['sel_cluster']
     st.session_state['adata_merge_filtered'] = adata_merge if 'adata_merge_filtered' not in st.session_state.keys() else st.session_state['adata_merge_filtered']
+    del(adata_merge)
     if st.session_state['adata_merge_filtered'].shape[0]>1:
         plot_map(st.session_state['adata_merge_filtered'],st.session_state['method'],st.session_state['sel_cluster'])
         
@@ -443,6 +446,7 @@ def compute_DEG(cluster_name,selected_cluster,referece_cluster):
     sc.tl.rank_genes_groups(adata_merge_filtered, cluster_name, groups=[str(selected_cluster)],reference=str(referece_cluster),
                             method='wilcoxon',key_added = "wilcoxon")
     st.session_state['adata_merge_filtered'] = adata_merge_filtered
+    del(adata_merge_filtered)
     
 #@st.cache(allow_output_mutation=True)    
 def get_wilcoxon_result(adata_merge_filtered,selected_cluster):
@@ -556,6 +560,7 @@ with tab3:
     res_pd_filter['logfoldchanges'] = res_pd_filter['logfoldchanges'].round(2)
     res_pd_filter['scores'] = res_pd_filter['scores'].round(2)
     st.session_state['res_pd_filter'] = res_pd_filter
+    del(res_pd_filter)
     ### show table ###
     st.subheader(fileName+" differetially expressed genes sorted by scores (the z-score underlying the computation of a p-value for each gene for each group).")
     st.write(st.session_state['res_pd_filter'])
@@ -688,7 +693,9 @@ with tab4:
     st.session_state['PAGERSet'] = PAGERSet
     st.session_state['pag_ids'] = pag_ids
     st.session_state['res_pd_filter'] = res_pd_filter
-
+    del(PAGERSet)
+    del(pag_ids)
+    del(res_pd_filter)
 
 ##st.write(PAGERSet.shape[1])
 #if PAGERSet.shape[1] < 2:
@@ -809,6 +816,7 @@ with tab5:
         tuple(['HAPPI','STRING']),
         key = "PPI_SOURCE"
     )
+    ### PPI
     if PPIsource == 'STRING':
         st.write("The network utilized a threshold of 0.7 for the STRING's PPI score.")
     elif PPIsource == 'HAPPI':
@@ -889,7 +897,7 @@ with tab5:
     res_pd_filter['logfoldchanges'] = res_pd_filter['logfoldchanges'].round(2)
     deg_results = res_pd_filter
     st.write(res_pd_filter)
-    
+    del(res_pd_filter)
     genesExp = [x for x in deg_results[['human','logfoldchanges']].values.tolist()] # if str(x[0]) != 'nan'
     #st.write(np.array(genesExp)[:,-1])
     # expression data in network
@@ -904,7 +912,7 @@ with tab5:
     DataE['log2FC'] = DataE['log2FC'].astype('float')
     DataE['log2FC'] = DataE['log2FC'].round(2)
     st.write(DataE)
-    
+    del(DataE)
     ### show expression figure ###
     marker_genes = res_pd_filter[res_pd_filter.human.isin(DataE.symbol.values)].mouse_symbol
     #st.write(marker_genes)
@@ -989,7 +997,7 @@ with tab5:
         st.write("No expression.")
     #except:
     #    st.write("You select nothing.")
-
+    del(carac)
 # Add a footer
 st.header('Cite us:')
 st.markdown(f"\n* Fengyuan Huang, Robert S. Welner, Jake Chen*, and Zongliang Yue*, PAGER-scFGA: Unveiling Natural Killer Cell Functional Maturation and Differentiation through Single-Cell Functional Genomics Analysis, under review.")
@@ -1001,6 +1009,7 @@ st.markdown("https://discovery.informatics.uab.edu/HAPPI/")
 st.header('About us:')
 st.write(f"If you have questions or comments about the database contents or technical support, please email Dr. Zongliang Yue, zzy0065@auburn.edu")
 st.write("Our Research group: AI.pharm, Health Outcome Research and Policy, Harrison College of Pharmacy, Auburn University, Auburn, USA. https://github.com/ai-pharm-AU")
+gc.collect()
 ##for idx in range(0,len(degs)):
 ##    deg=degs[idx]
 ##    sampleName=deg[0]
