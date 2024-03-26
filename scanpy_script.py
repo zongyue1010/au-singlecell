@@ -222,7 +222,7 @@ def chunk_array(arr, chunk_size):
 
 
 # Return GBM treatment data as a data frame.
-#@st.cache_data(allow_output_mutation=True)
+@st.cache_data()
 def load_h5ad_file(workingdir):
     #df = pd.read_csv('SampleTreatment.txt',sep="\t")
     #adata_merge = sc.read_h5ad('input/'+workingdir+'/'+'scanpy_adata_merge_15249_unregress.h5ad')
@@ -516,8 +516,10 @@ with tab3:
     # initiate the parameters #s
     st.session_state['fileName'] = fileName = 'c'+str(selected_cluster)+'_vs_'+'c'+str(referece_cluster)
     # perform Wilcoxon analysis
-    res_pd = get_wilcoxon_result(st.session_state['adata_merge_filtered'],selected_cluster)
-    
+    if 'adata_merge_filtered' in st.session_state.keys():
+        res_pd = get_wilcoxon_result(st.session_state['adata_merge_filtered'],selected_cluster)
+    else:
+        res_pd = pd.DataFrame()
     with st.form("formStep3_2"):    
         score_max = int(np.floor(max(res_pd['scores'].values)))
         score_min = int(np.floor(min(res_pd['scores'].values)))
