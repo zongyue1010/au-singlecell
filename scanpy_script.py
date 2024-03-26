@@ -897,7 +897,7 @@ with tab5:
     res_pd_filter['logfoldchanges'] = res_pd_filter['logfoldchanges'].round(2)
     deg_results = res_pd_filter
     st.write(res_pd_filter)
-    del(res_pd_filter)
+    
     genesExp = [x for x in deg_results[['human','logfoldchanges']].values.tolist()] # if str(x[0]) != 'nan'
     #st.write(np.array(genesExp)[:,-1])
     # expression data in network
@@ -915,6 +915,7 @@ with tab5:
     del(DataE)
     ### show expression figure ###
     marker_genes = res_pd_filter[res_pd_filter.human.isin(DataE.symbol.values)].mouse_symbol
+    del(res_pd_filter)
     #st.write(marker_genes)
     option = st.selectbox(
          'Type of gene expression\'s figure',
