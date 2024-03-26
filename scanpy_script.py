@@ -912,10 +912,10 @@ with tab5:
     DataE['log2FC'] = DataE['log2FC'].astype('float')
     DataE['log2FC'] = DataE['log2FC'].round(2)
     st.write(DataE)
-    del(DataE)
+    
     ### show expression figure ###
     marker_genes = res_pd_filter[res_pd_filter.human.isin(DataE.symbol.values)].mouse_symbol
-
+    
     #st.write(marker_genes)
     option = st.selectbox(
          'Type of gene expression\'s figure',
@@ -994,6 +994,8 @@ with tab5:
         #agraph(list(idx2symbol.values()), (PPI), config)
         st.markdown(get_table_download_link(pd.DataFrame(PPI), fileName = ' '+fileName+' '+str(PAGid)+' data for interactions'), unsafe_allow_html=True)
         st.markdown(get_table_download_link(pd.DataFrame(DataE), fileName = ' '+fileName+' '+str(PAGid)+' data for gene expressions'), unsafe_allow_html=True)
+        del(DataE)
+        del(PPI)
     else:
         st.write("No expression.")
     #except:
