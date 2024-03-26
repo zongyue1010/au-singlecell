@@ -21,6 +21,12 @@ import anndata
 from PIL import Image
 pd.set_option("display.precision", 2)
 
+import logging
+# Suppress Streamlit warning messages
+logging.basicConfig(level=logging.ERROR)
+st_logger = logging.getLogger('streamlit')
+st_logger.setLevel(logging.INFO)
+
 ### coloring library ###
 # color mapping of the gene expression #
 from matplotlib import cm
@@ -798,7 +804,7 @@ with tab5:
     symbol2idx = dict()
     symbol2size = dict()
     idx=0
-    geneRanked['RP_SCORE'].fillna(0.1, inplace=True)
+    geneRanked['RP_SCORE'] = geneRanked['RP_SCORE'].fillna(0.1)
     geneRanked['RP_SCORE'] = geneRanked['RP_SCORE'].astype(float)
     geneRanked['node_size'] = geneRanked['RP_SCORE'] *4
     geneRanked['RP_SCORE'] = geneRanked['RP_SCORE'].round(0)
