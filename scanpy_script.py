@@ -268,6 +268,16 @@ def run_pager(genes, sources, olap, sim, fdr):
 #	print(response.request.body)
     return(response_pd)
 
+# pathInt is a function connected to PAGER api to retrieve the m-type relationships of PAGs using a list of PAG IDs 
+def pathInt(PAG_IDs):
+    # Set up the call parameters as a dict.
+    params = {}
+    params['pag'] = ','.join(PAG_IDs)
+    # Work around PAGER API form encode issue.
+    response = requests.post('https://discovery.informatics.uab.edu/PAGER/index.php/pag_pag/inter_network_int_api/', data=params)
+    #print(response.request.body)
+    return pd.DataFrame(response.json()['data'])
+        
 # gene network in PAG
 #@st.cache_data(allow_output_mutation=True)
 def run_pager_int(PAGid):
@@ -663,10 +673,16 @@ with tab4:
         #PAGERSet = PAGERSet.append(filtered_output)
         PAGERSet = pd.concat([PAGERSet, filtered_output])
         st.markdown(get_table_download_link(filtered_output, fileName = fileName +' geneset enrichment result'), unsafe_allow_html=True)
+
     PAGERSet = pd.DataFrame(PAGERSet)
+    mtype=pathInt(PAG_IDs = PAGERSet['GS_ID'].values)    
+    st.write(mtype)
+    st.markdown(get_table_download_link(mtype, fileName = fileName +' m-type relationship result'), unsafe_allow_html=True)
     st.session_state['PAGERSet'] = PAGERSet
     st.session_state['pag_ids'] = pag_ids
     st.session_state['res_pd_filter'] = res_pd_filter
+
+
 ##st.write(PAGERSet.shape[1])
 #if PAGERSet.shape[1] < 2:
 #    st.write("No enriched PAGs found. Try a lower similarity score or a lower -log2-based FDR cutoff and rerun.")
