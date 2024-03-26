@@ -394,7 +394,7 @@ with tab1:
     st.session_state['sel_cluster'] = tuple([str(leiden_idx) for leiden_idx in list(range(0,leiden_max))]) if 'sel_cluster' not in st.session_state.keys() else st.session_state['sel_cluster']
     st.session_state['adata_merge_filtered'] = adata_merge if 'adata_merge_filtered' not in st.session_state.keys() else st.session_state['adata_merge_filtered']
     del(adata_merge)
-    if st.session_state['adata_merge_filtered'].shape[0]>1:
+    if 'adata_merge_filtered' in st.session_state.keys():
         plot_map(st.session_state['adata_merge_filtered'],st.session_state['method'],st.session_state['sel_cluster'])
         
     #import plotly.express as px
