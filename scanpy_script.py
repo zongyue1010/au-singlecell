@@ -677,9 +677,10 @@ with tab4:
 
     PAGERSet = pd.DataFrame(PAGERSet)
     mtype=pathInt(PAG_IDs = PAGERSet['GS_ID'].values)
-    
-    #mtype['SIMILARITY'] = mtype['SIMILARITY'].round(2)
-    #mtype['PVALUE'] = mtype['PVALUE'].round(2)
+    mtype['SIMILARITY']=mtype['SIMILARITY'].astype(np.float16)
+    mtype=mtype.rename(columns={'PVALUE':'nlogPvalue'})   
+    mtype['SIMILARITY'] = mtype['SIMILARITY'].round(2)
+    mtype['nlogPvalue']=mtype['nlogPvalue'].str.split(".",expand=True)[0]
     st.write(mtype)
     st.markdown(get_table_download_link(mtype, fileName = fileName +' m-type relationship result'), unsafe_allow_html=True)
     st.session_state['PAGERSet'] = PAGERSet
