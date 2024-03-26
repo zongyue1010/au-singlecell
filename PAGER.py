@@ -47,7 +47,7 @@ class PAGER():
         params['cohesion'] = str(nCoCo)
         params['pvalue'] = pvalue
         params['FDR'] = FDR
-        response = requests.post('http://discovery.informatics.uab.edu/PAGER/index.php/geneset/pagerapi', data=params)
+        response = requests.post('https://discovery.informatics.uab.edu/PAGER/index.php/geneset/pagerapi', data=params)
         #print(response.request.body)
         return pd.DataFrame(response.json())
     
