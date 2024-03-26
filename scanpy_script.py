@@ -926,7 +926,7 @@ with tab5:
         dp = sc.pl.dotplot(adata_merge_filtered, marker_genes.values, groupby='leiden', return_fig=True) # ,categories_order=sel_cluster
         st.pyplot(dp.add_totals().style(dot_edge_color='black', dot_edge_lw=0.5,cmap="viridis").show()) # , cmap='viridis'
     elif option == 'heatmap':
-        sc.tl.dendrogram(adata_merge_filtered,groupby="leiden")
+        #sc.tl.dendrogram(adata_merge_filtered,groupby="leiden")
         st.pyplot(sc.pl.heatmap(adata_merge_filtered, marker_genes.values, groupby='leiden', swap_axes=True,cmap="viridis"))
     elif option == 'violin':
         st.pyplot(sc.pl.stacked_violin(adata_merge_filtered, marker_genes.values, groupby='leiden',cmap="viridis",categories_order=sel_cluster))
