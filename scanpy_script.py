@@ -929,9 +929,9 @@ with tab5:
         #sc.tl.dendrogram(adata_merge_filtered,groupby="leiden")
         st.pyplot(sc.pl.heatmap(adata_merge_filtered, marker_genes.values, groupby='leiden', swap_axes=True,cmap="viridis"))
     elif option == 'violin':
-        st.pyplot(sc.pl.stacked_violin(adata_merge_filtered, marker_genes.values, groupby='leiden',cmap="viridis",categories_order=sel_cluster))
+        st.pyplot(sc.pl.stacked_violin(adata_merge_filtered, marker_genes.values, groupby='leiden',cmap="viridis")) # ,categories_order=sel_cluster
     elif option == 'matrix':   
-        st.pyplot(sc.pl.matrixplot(adata_merge_filtered, marker_genes.values, groupby='leiden',cmap="viridis",categories_order=sel_cluster))
+        st.pyplot(sc.pl.matrixplot(adata_merge_filtered, marker_genes.values, groupby='leiden',cmap="viridis")) # ,categories_order=sel_cluster
     if np.size(np.array(expInNetwork))>0:
         zeroInNetwork=[[i,'0'] for i in idx2symbol.values() if i not in np.array(expInNetwork)[:,0]]
     else:
