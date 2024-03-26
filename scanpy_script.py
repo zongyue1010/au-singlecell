@@ -230,7 +230,7 @@ def load_h5ad_file(workingdir):
     ### load the chunked ###
     output_dir = 'input/'+workingdir+'/scanpy_adata_merge_15249_unregress/'
     file_list = glob.glob(os.path.join(output_dir, "*"))
-    st.session_state['adata_merge'] = load_files(file_list[0,1,3,4,6,7,10,13,15,17])
+    st.session_state['adata_merge'] = load_files([file_list[pos] for pos in [0,1,3,4,6,7,9,13,15,17]])#[my_array[pos] for pos in positions]
     ######
     description = pd.read_csv('input/'+workingdir+'/'+'description.txt',sep="\t")
     cellpop = pd.read_csv('input/'+workingdir+'/'+'cellpop.txt',sep="\t")
