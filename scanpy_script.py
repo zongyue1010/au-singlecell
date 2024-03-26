@@ -915,7 +915,7 @@ with tab5:
     del(DataE)
     ### show expression figure ###
     marker_genes = res_pd_filter[res_pd_filter.human.isin(DataE.symbol.values)].mouse_symbol
-    del(res_pd_filter)
+
     #st.write(marker_genes)
     option = st.selectbox(
          'Type of gene expression\'s figure',
@@ -938,7 +938,7 @@ with tab5:
         zeroInNetwork=[[i,'0'] for i in idx2symbol.values()]
     for i in zeroInNetwork:
         expInNetwork.append(i)
-        
+    del(adata_merge_filtered)
     # And a data frame with characteristics for your nodes in networkx
     carac = pd.DataFrame({'ID':np.array(expInNetwork)[:,0], 
                           'myvalue':[np.float64(i) for i in np.array(expInNetwork)[:,1]] })
