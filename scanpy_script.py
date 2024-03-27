@@ -223,7 +223,7 @@ def chunk_array(arr, chunk_size):
 
 
 # Return GBM treatment data as a data frame.
-@st.cache_data()
+#@st.cache_data()
 def load_h5ad_file(workingdir):
     #df = pd.read_csv('SampleTreatment.txt',sep="\t")
     #adata_merge = sc.read_h5ad('input/'+workingdir+'/'+'scanpy_adata_merge_15249_unregress.h5ad')
@@ -394,7 +394,7 @@ with tab1:
     st.session_state['sel_cluster'] = tuple([str(leiden_idx) for leiden_idx in list(range(0,leiden_max))]) if 'sel_cluster' not in st.session_state.keys() else st.session_state['sel_cluster']
     st.session_state['adata_merge_filtered'] = adata_merge if 'adata_merge_filtered' not in st.session_state.keys() else st.session_state['adata_merge_filtered']
     del(adata_merge)
-    if 'adata_merge_filtered' in st.session_state.keys():
+    if ('adata_merge_filtered' in st.session_state.keys()) & ('method' in st.session_state.keys()) & ('sel_cluster' in st.session_state.keys()):
         plot_map(st.session_state['adata_merge_filtered'],st.session_state['method'],st.session_state['sel_cluster'])
         
     #import plotly.express as px
@@ -462,7 +462,7 @@ def get_wilcoxon_result(adata_merge_filtered,selected_cluster):
     return(res_pd)
 
 # return the filtered gene list dataframe
-@st.cache_data() #allow_output_mutation=True
+#@st.cache_data() #allow_output_mutation=True
 def marker_filter(res_pd,user_score_min, user_score_max,user_lf_min, user_lf_max,pvals_adj):   
     res_pd_filter = res_pd[
         ((res_pd['scores']<user_score_min) | (res_pd['scores']>user_score_max)) 
