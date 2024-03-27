@@ -22,11 +22,11 @@ from PIL import Image
 pd.set_option("display.precision", 2)
 #import gc
 
-import logging
-# Suppress Streamlit warning messages
-logging.basicConfig(level=logging.ERROR)
-st_logger = logging.getLogger('streamlit')
-st_logger.setLevel(logging.INFO)
+#import logging
+## Suppress Streamlit warning messages
+#logging.basicConfig(level=logging.ERROR)
+#st_logger = logging.getLogger('streamlit')
+#st_logger.setLevel(logging.INFO)
 
 ### coloring library ###
 # color mapping of the gene expression #
@@ -202,7 +202,7 @@ def get_table_download_link(df, **kwargs):
     href = f'<a href="data:file/csv;base64,{b64}" download="'+kwargs['fileName']+'\.txt">'+prefix+'</a>'
     return(href)
 
-
+@st.cache_data(ttl=60,max_entries=2,persist="disk")
 def load_files(file_list):
     #file_list = glob.glob(os.path.join(output_dir, "*"))
     i=0
@@ -217,13 +217,14 @@ def load_files(file_list):
         del(adata)
         #print(i)
     return(st.session_state['adata_merge'])
+    
 def chunk_array(arr, chunk_size):
     for i in range(0, len(arr), chunk_size):
         yield arr[i:i + chunk_size]
 
 
 # Return GBM treatment data as a data frame.
-@st.cache_data(ttl=60,max_entries=10)
+@st.cache_data(ttl=60,max_entries=2,persist="disk")
 def load_h5ad_file(workingdir):
     #df = pd.read_csv('SampleTreatment.txt',sep="\t")
     #adata_merge = sc.read_h5ad('input/'+workingdir+'/'+'scanpy_adata_merge_15249_unregress.h5ad')
@@ -240,6 +241,7 @@ def load_h5ad_file(workingdir):
 # Call PAGER REST API to perform hypergeometric test and return enriched PAGs associated with given list of genes as a data frame.
 # See pathFun() in PAGER R SDK at https://uab.app.box.com/file/529139337869.
 #@st.cache_data(allow_output_mutation=True)
+@st.cache_data(ttl=60,max_entries=2,persist="disk")
 def run_pager(genes, sources, olap, sim, fdr):
     # Set up the call parameters as a dict.
     params = {}
@@ -269,7 +271,8 @@ def run_pager(genes, sources, olap, sim, fdr):
 #	print(response.request.body)
     return(response_pd)
 
-# pathInt is a function connected to PAGER api to retrieve the m-type relationships of PAGs using a list of PAG IDs 
+# pathInt is a function connected to PAGER api to retrieve the m-type relationships of PAGs using a list of PAG IDs
+@st.cache_data(ttl=60,max_entries=2,persist="disk")
 def pathInt(PAG_IDs):
     # Set up the call parameters as a dict.
     params = {}
@@ -281,18 +284,21 @@ def pathInt(PAG_IDs):
         
 # gene network in PAG
 #@st.cache_data(allow_output_mutation=True)
+@st.cache_data(ttl=60,max_entries=2,persist="disk")
 def run_pager_int(PAGid):
 	response = requests.get('https://discovery.informatics.uab.edu/PAGER/index.php/pag_mol_mol_map/interactions/'+str(PAGid))
 	return pd.DataFrame(response.json())
 
 # pag_ranked_gene in PAG
 #@st.cache_data(allow_output_mutation=True)
+@st.cache_data(ttl=60,max_entries=2,persist="disk")
 def pag_ranked_gene(PAGid):
 	response = requests.get('https://discovery.informatics.uab.edu/PAGER/index.php/genesinPAG/viewgenes/'+str(PAGid))
 	return pd.DataFrame(response.json()['gene'])
 
 # generate force layout
 #@st.cache_data(allow_output_mutation=True)
+@st.cache_data(ttl=60,max_entries=2,persist="disk")
 def run_force_layout(G):
     pos=nx.spring_layout(G, dim=2, k=None, pos=None, fixed=None, iterations=50, weight='weight', scale=1.0)
     return(pos)
@@ -334,7 +340,7 @@ pct = pct.reset_index()
 colors_custm = ['steelblue','darkorange','green']
 leiden_max = max(pct['leiden'].astype('int')) + 1
 
-
+@st.cache_data(ttl=60,max_entries=2,persist="disk")
 def plot_map(adata_merge_filtered,method,sel_cluster):
     #sc.tl.dendrogram(adata_merge_filtered,groupby="leiden") 
     # https://plotly.com/python/pie-charts/#basic-pie-chart-with-gopie
