@@ -701,25 +701,29 @@ with tab4:
 
     PAGERSet = pd.DataFrame(PAGERSet)
     st.write("The table of m-type PAG-to-PAG relationship from PAGER database.")
+    
     mtype=pathInt(PAG_IDs = PAGERSet['GS_ID'].values)    
-    mtype['SIMILARITY']=mtype['SIMILARITY'].astype(np.float32)
-    mtype['SIMILARITY']=mtype[['SIMILARITY']].round(2)
-    mtype=mtype.rename(columns={'PVALUE':'nlogPvalue'})   
-    mtype['SIMILARITY'] = mtype['SIMILARITY'].round(2)
-    mtype['nlogPvalue']=mtype['nlogPvalue'].str.split(".",expand=True)[0]
-    st.write(mtype)
-    st.markdown(get_table_download_link(mtype, fileName = fileName +' m-type relationship result'), unsafe_allow_html=True)
-    st.write("The table of r-type PAG-to-PAG relationship from PAGER database.")
+    if mtype.shape[0]>0:
+        mtype['SIMILARITY']=mtype['SIMILARITY'].astype(np.float32)
+        mtype['SIMILARITY']=mtype[['SIMILARITY']].round(2)
+        mtype=mtype.rename(columns={'PVALUE':'nlogPvalue'})   
+        mtype['SIMILARITY'] = mtype['SIMILARITY'].round(2)
+        mtype['nlogPvalue']=mtype['nlogPvalue'].str.split(".",expand=True)[0]
+        st.write(mtype)
+        st.markdown(get_table_download_link(mtype, fileName = fileName +' m-type relationship result'), unsafe_allow_html=True)
+        st.write("The table of r-type PAG-to-PAG relationship from PAGER database.")
+    
     rtype=pathReg(PAG_IDs = list(pager_output['GS_ID'].values))
-    rtype['GS_N']=rtype['GS_N'].astype(np.int16)
-    rtype['GS_A_OUT']=rtype['GS_A_OUT'].astype(np.int16)
-    rtype['GS_B_IN']=rtype['GS_B_IN'].astype(np.int16)
-    rtype['AB']=rtype['AB'].astype(np.int16)
-    rtype=rtype.rename(columns={'ABLOGCDF':'ABnlogPvalue'})
-    rtype['ABnlogPvalue']=rtype['ABnlogPvalue'].astype(np.float32)
-    rtype['ABnlogPvalue']=rtype[['ABnlogPvalue']].round(2)
-    st.write(rtype)
-    st.markdown(get_table_download_link(rtype, fileName = fileName +' r-type relationship result'), unsafe_allow_html=True)
+    if rtype.shape[0]>0:
+        rtype['GS_N']=rtype['GS_N'].astype(np.int16)
+        rtype['GS_A_OUT']=rtype['GS_A_OUT'].astype(np.int16)
+        rtype['GS_B_IN']=rtype['GS_B_IN'].astype(np.int16)
+        rtype['AB']=rtype['AB'].astype(np.int16)
+        rtype=rtype.rename(columns={'ABLOGCDF':'ABnlogPvalue'})
+        rtype['ABnlogPvalue']=rtype['ABnlogPvalue'].astype(np.float32)
+        rtype['ABnlogPvalue']=rtype[['ABnlogPvalue']].round(2)
+        st.write(rtype)
+        st.markdown(get_table_download_link(rtype, fileName = fileName +' r-type relationship result'), unsafe_allow_html=True)
     
     st.session_state['PAGERSet'] = PAGERSet
     st.session_state['pag_ids'] = pag_ids
