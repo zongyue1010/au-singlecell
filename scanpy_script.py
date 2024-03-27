@@ -700,8 +700,8 @@ with tab4:
         st.markdown(get_table_download_link(filtered_output, fileName = fileName +' geneset enrichment result'), unsafe_allow_html=True)
 
     PAGERSet = pd.DataFrame(PAGERSet)
+
     st.write("The table of m-type PAG-to-PAG relationship from PAGER database.")
-    
     mtype=pathInt(PAG_IDs = PAGERSet['GS_ID'].values)    
     if mtype.shape[0]>0:
         mtype['SIMILARITY']=mtype['SIMILARITY'].astype(np.float32)
@@ -711,8 +711,11 @@ with tab4:
         mtype['nlogPvalue']=mtype['nlogPvalue'].str.split(".",expand=True)[0]
         st.write(mtype)
         st.markdown(get_table_download_link(mtype, fileName = fileName +' m-type relationship result'), unsafe_allow_html=True)
-        st.write("The table of r-type PAG-to-PAG relationship from PAGER database.")
+        
+    else:
+        st.write("No record for m-type PAG-to-PAG relationship among enriched PAGs.")
     
+    st.write("The table of r-type PAG-to-PAG relationship from PAGER database.")
     rtype=pathReg(PAG_IDs = list(pager_output['GS_ID'].values))
     if rtype.shape[0]>0:
         rtype['GS_N']=rtype['GS_N'].astype(np.int16)
@@ -724,7 +727,8 @@ with tab4:
         rtype['ABnlogPvalue']=rtype[['ABnlogPvalue']].round(2)
         st.write(rtype)
         st.markdown(get_table_download_link(rtype, fileName = fileName +' r-type relationship result'), unsafe_allow_html=True)
-    
+    else:
+        st.write("No record for r-type PAG-to-PAG relationship among enriched PAGs.")    
     st.session_state['PAGERSet'] = PAGERSet
     st.session_state['pag_ids'] = pag_ids
     st.session_state['res_pd_filter'] = res_pd_filter
