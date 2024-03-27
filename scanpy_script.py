@@ -223,7 +223,7 @@ def chunk_array(arr, chunk_size):
 
 
 # Return GBM treatment data as a data frame.
-@st.cache_data()
+@st.cache_data(ttl=60,max_entries=10)
 def load_h5ad_file(workingdir):
     #df = pd.read_csv('SampleTreatment.txt',sep="\t")
     #adata_merge = sc.read_h5ad('input/'+workingdir+'/'+'scanpy_adata_merge_15249_unregress.h5ad')
