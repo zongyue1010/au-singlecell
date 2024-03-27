@@ -20,7 +20,7 @@ import glob
 import anndata
 from PIL import Image
 pd.set_option("display.precision", 2)
-import gc
+#import gc
 
 import logging
 # Suppress Streamlit warning messages
@@ -223,7 +223,7 @@ def chunk_array(arr, chunk_size):
 
 
 # Return GBM treatment data as a data frame.
-#@st.cache_data()
+@st.cache_data()
 def load_h5ad_file(workingdir):
     #df = pd.read_csv('SampleTreatment.txt',sep="\t")
     #adata_merge = sc.read_h5ad('input/'+workingdir+'/'+'scanpy_adata_merge_15249_unregress.h5ad')
@@ -231,7 +231,7 @@ def load_h5ad_file(workingdir):
     ### load the chunked ###
     output_dir = 'input/'+workingdir+'/scanpy_adata_merge_15249_unregress/'
     file_list = glob.glob(os.path.join(output_dir, "*"))
-    st.session_state['adata_merge'] = load_files([file_list[pos] for pos in [0,1,3,4,6,7,9,13,15,17]])#[my_array[pos] for pos in positions]
+    st.session_state['adata_merge'] = load_files([file_list[pos] for pos in [0,3,5,7,9,13,15,17]])#[my_array[pos] for pos in positions]
     ######
     description = pd.read_csv('input/'+workingdir+'/'+'description.txt',sep="\t")
     cellpop = pd.read_csv('input/'+workingdir+'/'+'cellpop.txt',sep="\t")
@@ -938,7 +938,6 @@ with tab5:
         zeroInNetwork=[[i,'0'] for i in idx2symbol.values()]
     for i in zeroInNetwork:
         expInNetwork.append(i)
-    del(adata_merge_filtered)
     # And a data frame with characteristics for your nodes in networkx
     carac = pd.DataFrame({'ID':np.array(expInNetwork)[:,0], 
                           'myvalue':[np.float64(i) for i in np.array(expInNetwork)[:,1]] })
@@ -1001,6 +1000,14 @@ with tab5:
     #except:
     #    st.write("You select nothing.")
     del(carac)
+    del(PAGERSet)
+    del(pag_ids)
+    del(adata_merge_filtered)
+    del(res_pd_filter)
+    del(fileName)
+    del(sel_cluster)
+
+
 # Add a footer
 st.header('Cite us:')
 st.markdown(f"\n* Fengyuan Huang, Robert S. Welner, Jake Chen*, and Zongliang Yue*, PAGER-scFGA: Unveiling Natural Killer Cell Functional Maturation and Differentiation through Single-Cell Functional Genomics Analysis, under review.")
@@ -1012,7 +1019,7 @@ st.markdown("https://discovery.informatics.uab.edu/HAPPI/")
 st.header('About us:')
 st.write(f"If you have questions or comments about the database contents or technical support, please email Dr. Zongliang Yue, zzy0065@auburn.edu")
 st.write("Our Research group: AI.pharm, Health Outcome Research and Policy, Harrison College of Pharmacy, Auburn University, Auburn, USA. https://github.com/ai-pharm-AU")
-gc.collect()
+#gc.collect()
 ##for idx in range(0,len(degs)):
 ##    deg=degs[idx]
 ##    sampleName=deg[0]
