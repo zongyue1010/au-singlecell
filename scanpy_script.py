@@ -340,7 +340,7 @@ pct = pct.reset_index()
 colors_custm = ['steelblue','darkorange','green']
 leiden_max = max(pct['leiden'].astype('int')) + 1
 
-@st.cache_data(ttl=60,max_entries=2,persist="disk")
+#@st.cache_data(ttl=60,max_entries=2,persist="disk")
 def plot_map(adata_merge_filtered,method,sel_cluster):
     #sc.tl.dendrogram(adata_merge_filtered,groupby="leiden") 
     # https://plotly.com/python/pie-charts/#basic-pie-chart-with-gopie
