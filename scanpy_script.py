@@ -336,20 +336,7 @@ leiden_max = max(pct['leiden'].astype('int')) + 1
 
 
 def plot_map(adata_merge_filtered,method,sel_cluster):
-    sc.tl.dendrogram(adata_merge_filtered,groupby="leiden")
-    if method == "tSNE":
-        #fig, axs = plt.subplots(1, 2, figsize=(8,4),constrained_layout=True)
-        st.pyplot(sc.pl.tsne(adata_merge_filtered, color="sample", title=" tSNE",frameon=True, #legend_loc='on data'
-                            ))
-        st.pyplot(sc.pl.tsne(adata_merge_filtered, color="leiden", title=" tSNE", add_outline=True, #legend_loc='on data',
-                   legend_fontsize=12, legend_fontoutline=2,frameon=True))
-    
-    elif method == "UMAP":
-        #fig, axs = plt.subplots(1, 2, figsize=(8,4),constrained_layout=True)
-        st.pyplot(sc.pl.umap(adata_merge_filtered, color="sample", title=" UMAP",frameon=True, #legend_loc='on data'
-                            ))
-        st.pyplot(sc.pl.umap(adata_merge_filtered, color="leiden", title=" UMAP", add_outline=True, #legend_loc='on data',
-                   legend_fontsize=12, legend_fontoutline=2,frameon=True))
+    #sc.tl.dendrogram(adata_merge_filtered,groupby="leiden") 
     # https://plotly.com/python/pie-charts/#basic-pie-chart-with-gopie
     vec = []
     for i in range(0,int(np.ceil(leiden_max/3))):
@@ -395,6 +382,19 @@ with tab1:
     st.session_state['adata_merge_filtered'] = adata_merge if 'adata_merge_filtered' not in st.session_state.keys() else st.session_state['adata_merge_filtered']
     del(adata_merge)
     if ('adata_merge_filtered' in st.session_state.keys()) & ('method' in st.session_state.keys()) & ('sel_cluster' in st.session_state.keys()):
+        if method == "tSNE":
+            #fig, axs = plt.subplots(1, 2, figsize=(8,4),constrained_layout=True)
+            st.pyplot(sc.pl.tsne(st.session_state['adata_merge_filtered'], color="sample", title=" tSNE",frameon=True, #legend_loc='on data'
+                                ))
+            st.pyplot(sc.pl.tsne(st.session_state['adata_merge_filtered'], color="leiden", title=" tSNE", add_outline=True, #legend_loc='on data',
+                       legend_fontsize=12, legend_fontoutline=2,frameon=True))
+        
+        elif method == "UMAP":
+            #fig, axs = plt.subplots(1, 2, figsize=(8,4),constrained_layout=True)
+            st.pyplot(sc.pl.umap(st.session_state['adata_merge_filtered'], color="sample", title=" UMAP",frameon=True, #legend_loc='on data'
+                                ))
+            st.pyplot(sc.pl.umap(st.session_state['adata_merge_filtered'], color="leiden", title=" UMAP", add_outline=True, #legend_loc='on data',
+                       legend_fontsize=12, legend_fontoutline=2,frameon=True))            
         plot_map(st.session_state['adata_merge_filtered'],st.session_state['method'],st.session_state['sel_cluster'])
         
     #import plotly.express as px
