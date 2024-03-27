@@ -281,7 +281,18 @@ def pathInt(PAG_IDs):
     response = requests.post('https://discovery.informatics.uab.edu/PAGER/index.php/pag_pag/inter_network_int_api/', data=params)
     #print(response.request.body)
     return pd.DataFrame(response.json()['data'])
-        
+
+# pathReg is a function connected to PAGER api to retrieve the r-type relationships of PAGs using a list of PAG IDs   
+@st.cache_data(ttl=60,max_entries=2,persist="disk")
+def pathReg(PAG_IDs):
+    # Set up the call parameters as a dict.
+    params = {}
+    params['pag'] = ','.join(PAG_IDs)
+    # Work around PAGER API form encode issue.
+    response = requests.post('https://discovery.informatics.uab.edu/PAGER/index.php/pag_pag/inter_network_reg_api/', data=params)
+    #print(response.request.body)
+    return pd.DataFrame(response.json()['data'])
+    
 # gene network in PAG
 #@st.cache_data(allow_output_mutation=True)
 @st.cache_data(ttl=60,max_entries=2,persist="disk")
@@ -689,20 +700,35 @@ with tab4:
         st.markdown(get_table_download_link(filtered_output, fileName = fileName +' geneset enrichment result'), unsafe_allow_html=True)
 
     PAGERSet = pd.DataFrame(PAGERSet)
-    mtype=pathInt(PAG_IDs = PAGERSet['GS_ID'].values)
-    mtype['SIMILARITY']=mtype['SIMILARITY'].astype(np.float16)
+    st.write("The table of m-type PAG-to-PAG relationship from PAGER database.")
+    mtype=pathInt(PAG_IDs = PAGERSet['GS_ID'].values)    
+    mtype['SIMILARITY']=mtype['SIMILARITY'].astype(np.float32)
+    mtype['SIMILARITY']=mtype[['SIMILARITY']].round(2)
     mtype=mtype.rename(columns={'PVALUE':'nlogPvalue'})   
     mtype['SIMILARITY'] = mtype['SIMILARITY'].round(2)
     mtype['nlogPvalue']=mtype['nlogPvalue'].str.split(".",expand=True)[0]
     st.write(mtype)
     st.markdown(get_table_download_link(mtype, fileName = fileName +' m-type relationship result'), unsafe_allow_html=True)
+    st.write("The table of r-type PAG-to-PAG relationship from PAGER database.")
+    rtype=pathReg(PAG_IDs = list(pager_output['GS_ID'].values))
+    rtype['GS_N']=rtype['GS_N'].astype(np.int16)
+    rtype['GS_A_OUT']=rtype['GS_A_OUT'].astype(np.int16)
+    rtype['GS_B_IN']=rtype['GS_B_IN'].astype(np.int16)
+    rtype['AB']=rtype['AB'].astype(np.int16)
+    rtype=rtype.rename(columns={'ABLOGCDF':'ABnlogPvalue'})
+    rtype['ABnlogPvalue']=rtype['ABnlogPvalue'].astype(np.float32)
+    rtype['ABnlogPvalue']=rtype[['ABnlogPvalue']].round(2)
+    st.write(rtype)
+    st.markdown(get_table_download_link(rtype, fileName = fileName +' r-type relationship result'), unsafe_allow_html=True)
+    
     st.session_state['PAGERSet'] = PAGERSet
     st.session_state['pag_ids'] = pag_ids
     st.session_state['res_pd_filter'] = res_pd_filter
     del(PAGERSet)
     del(pag_ids)
     del(res_pd_filter)
-
+    del(mtype)
+    del(rtype)
 ##st.write(PAGERSet.shape[1])
 #if PAGERSet.shape[1] < 2:
 #    st.write("No enriched PAGs found. Try a lower similarity score or a lower -log2-based FDR cutoff and rerun.")
