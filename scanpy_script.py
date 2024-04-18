@@ -1055,7 +1055,7 @@ with tab5:
 
 # Add a footer
 st.header('Cite us:')
-st.markdown(f"\n* Fengyuan Huang, Robert S. Welner, Jake Chen*, and Zongliang Yue*, PAGER-scFGA: Unveiling Natural Killer Cell Functional Maturation and Differentiation through Single-Cell Functional Genomics Analysis, under review.")
+st.markdown(f"\n* Fengyuan Huang, Robert S. Welner, Jake Chen*, and Zongliang Yue*, PAGER-scFGA: Unveiling Natural Killer Cell Functional Maturation and Differentiation through Single-Cell Functional Genomics Analysis, Front. Bioinform., 16 April 2024 Sec. Integrative Bioinformatics Volume 4 - 2024 | https://doi.org/10.3389/fbinf.2024.1336135")
 st.markdown(f"PAGER analysis:\nZongliang Yue, Qi Zheng, Michael T Neylon, Minjae Yoo, Jimin Shin, Zhiying Zhao, Aik Choon Tan, Jake Y Chen, PAGER 2.0: an update to the pathway, annotated-list and gene-signature electronic repository for Human Network Biology, Nucleic Acids Research, Volume 46, Issue D1, 4 January 2018, Pages D668–D676,https://doi.org/10.1093/nar/gkx1040\n")
 st.markdown("https://discovery.informatics.uab.edu/PAGER/")
 st.markdown(f"Protein-Protein Interactions (PPIs) in network construction:\nJake Y. Chen, Ragini Pandey, and Thanh M. Nguyen, (2017) HAPPI-2: a Comprehensive and High-quality Map of Human Annotated and Predicted Protein Interactions, BMC Genomics volume 18, Article number: 182")
