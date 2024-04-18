@@ -283,7 +283,7 @@ def pathInt(PAG_IDs):
     return pd.DataFrame(response.json()['data'])
 
 # pathReg is a function connected to PAGER api to retrieve the r-type relationships of PAGs using a list of PAG IDs   
-@st.cache_data(max_entries=3,persist="disk")
+@st.cache_data(max_entries=1,persist="disk")
 def pathReg(PAG_IDs):
     # Set up the call parameters as a dict.
     params = {}
