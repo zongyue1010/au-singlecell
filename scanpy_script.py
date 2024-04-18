@@ -397,23 +397,28 @@ with tab1:
     st.session_state['method'] = "tSNE" if 'method' not in st.session_state.keys() else st.session_state['method']
     st.session_state['sel_cluster'] = tuple([str(leiden_idx) for leiden_idx in list(range(0,leiden_max))]) if 'sel_cluster' not in st.session_state.keys() else st.session_state['sel_cluster']
     st.session_state['adata_merge_filtered'] = adata_merge if 'adata_merge_filtered' not in st.session_state.keys() else st.session_state['adata_merge_filtered']
-    del(adata_merge)
+    
     if ('adata_merge_filtered' in st.session_state.keys()) & ('method' in st.session_state.keys()) & ('sel_cluster' in st.session_state.keys()):
         if method == "tSNE":
-            #fig, axs = plt.subplots(1, 2, figsize=(8,4),constrained_layout=True)
-            st.pyplot(sc.pl.tsne(st.session_state['adata_merge_filtered'], color="sample", title=" tSNE",frameon=True, #legend_loc='on data'
-                                ))
-            st.pyplot(sc.pl.tsne(st.session_state['adata_merge_filtered'], color="leiden", title=" tSNE", add_outline=True, #legend_loc='on data',
-                       legend_fontsize=12, legend_fontoutline=2,frameon=True))
-        
+            try:
+                #fig, axs = plt.subplots(1, 2, figsize=(8,4),constrained_layout=True)
+                st.pyplot(sc.pl.tsne(st.session_state['adata_merge_filtered'], color="sample", title=" tSNE",frameon=True, #legend_loc='on data'
+                                    ))
+                st.pyplot(sc.pl.tsne(st.session_state['adata_merge_filtered'], color="leiden", title=" tSNE", add_outline=True, #legend_loc='on data',
+                           legend_fontsize=12, legend_fontoutline=2,frameon=True))
+            except:
+                print("plot error!")
         elif method == "UMAP":
-            #fig, axs = plt.subplots(1, 2, figsize=(8,4),constrained_layout=True)
-            st.pyplot(sc.pl.umap(st.session_state['adata_merge_filtered'], color="sample", title=" UMAP",frameon=True, #legend_loc='on data'
-                                ))
-            st.pyplot(sc.pl.umap(st.session_state['adata_merge_filtered'], color="leiden", title=" UMAP", add_outline=True, #legend_loc='on data',
-                       legend_fontsize=12, legend_fontoutline=2,frameon=True))            
+            try:
+                #fig, axs = plt.subplots(1, 2, figsize=(8,4),constrained_layout=True)
+                st.pyplot(sc.pl.umap(st.session_state['adata_merge_filtered'], color="sample", title=" UMAP",frameon=True, #legend_loc='on data'
+                                    ))
+                st.pyplot(sc.pl.umap(st.session_state['adata_merge_filtered'], color="leiden", title=" UMAP", add_outline=True, #legend_loc='on data',
+                           legend_fontsize=12, legend_fontoutline=2,frameon=True))
+            except:
+                print("plot error!")
         plot_map(st.session_state['adata_merge_filtered'],st.session_state['method'],st.session_state['sel_cluster'])
-        
+    del(adata_merge)    
     #import plotly.express as px
     #fig = px.scatter(x=adata.obsm['X_tsne'][:,0], y=adata.obsm['X_tsne'][:,1],color=adata.obs['bulk_labels'])
     #fig.show()
