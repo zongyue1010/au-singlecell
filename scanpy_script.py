@@ -202,7 +202,7 @@ def get_table_download_link(df, **kwargs):
     href = f'<a href="data:file/csv;base64,{b64}" download="'+kwargs['fileName']+'\.txt">'+prefix+'</a>'
     return(href)
 
-@st.cache_data(max_entries=1,persist="disk")
+@st.cache_data(max_entries=3,persist="disk")
 def load_files(file_list):
     #file_list = glob.glob(os.path.join(output_dir, "*"))
     i=0
@@ -224,7 +224,7 @@ def chunk_array(arr, chunk_size):
 
 
 # Return GBM treatment data as a data frame.
-@st.cache_data(max_entries=1,persist="disk")
+@st.cache_data(max_entries=3,persist="disk")
 def load_h5ad_file(workingdir):
     #df = pd.read_csv('SampleTreatment.txt',sep="\t")
     #adata_merge = sc.read_h5ad('input/'+workingdir+'/'+'scanpy_adata_merge_15249_unregress.h5ad')
@@ -272,7 +272,7 @@ def run_pager(genes, sources, olap, sim, fdr):
     return(response_pd)
 
 # pathInt is a function connected to PAGER api to retrieve the m-type relationships of PAGs using a list of PAG IDs
-@st.cache_data(max_entries=1,persist="disk")
+@st.cache_data(max_entries=3,persist="disk")
 def pathInt(PAG_IDs):
     # Set up the call parameters as a dict.
     params = {}
@@ -283,7 +283,7 @@ def pathInt(PAG_IDs):
     return pd.DataFrame(response.json()['data'])
 
 # pathReg is a function connected to PAGER api to retrieve the r-type relationships of PAGs using a list of PAG IDs   
-@st.cache_data(max_entries=1,persist="disk")
+@st.cache_data(max_entries=3,persist="disk")
 def pathReg(PAG_IDs):
     # Set up the call parameters as a dict.
     params = {}
@@ -963,8 +963,8 @@ with tab5:
     st.write('You selected:', option)
     sc.tl.dendrogram(adata_merge_filtered,groupby="leiden")
     if option == 'dotplot':      
-        dp = sc.pl.dotplot(adata_merge_filtered, marker_genes.values, groupby='leiden', return_fig=True) # ,categories_order=sel_cluster
-        st.pyplot(dp.add_totals().style(dot_edge_color='black', dot_edge_lw=0.5,cmap="viridis").show()) # , cmap='viridis'
+        #dp = sc.pl.dotplot(adata_merge_filtered, marker_genes.values, groupby='leiden') # return_fig=True,categories_order=sel_cluster
+        st.pyplot(sc.pl.dotplot(adata_merge_filtered, marker_genes.values, groupby='leiden',cmap="viridis")) # , cmap='viridis' # .add_totals().style(dot_edge_color='black', dot_edge_lw=0.5,cmap="viridis").show()
     elif option == 'heatmap':
         #sc.tl.dendrogram(adata_merge_filtered,groupby="leiden")
         st.pyplot(sc.pl.heatmap(adata_merge_filtered, marker_genes.values, groupby='leiden', swap_axes=True,cmap="viridis"))
