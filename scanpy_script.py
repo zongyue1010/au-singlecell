@@ -452,15 +452,17 @@ with tab2:
         # initiate the parameters #
         marker = st.session_state['adata_merge_filtered'].var_names.sort_values()[0] if 'marker' not in st.session_state.keys() else st.session_state['marker']  
         method = "tSNE" if 'method' not in st.session_state.keys() else st.session_state['method']
-        if method == "tSNE":
-            st.pyplot(sc.pl.tsne(st.session_state['adata_merge_filtered'], color=[marker], s=50, frameon=False, vmax='p99',cmap="viridis"))
-            st.pyplot(sc.pl.violin(st.session_state['adata_merge_filtered'], [marker], groupby='leiden'))
-            #sc.pl.violin(adata_merge_filtered, [marker], groupby='leiden')
-        elif method == "UMAP":    
-            st.pyplot(sc.pl.umap(st.session_state['adata_merge_filtered'], color=[marker], s=50, frameon=False, vmax='p99',cmap="viridis"))
-            st.pyplot(sc.pl.violin(st.session_state['adata_merge_filtered'], [marker], groupby='leiden'))
-            #sc.pl.violin(adata_merge_filtered, [marker], groupby='leiden')
-        
+        try:
+            if method == "tSNE":
+                st.pyplot(sc.pl.tsne(st.session_state['adata_merge_filtered'], color=[marker], s=50, frameon=False, vmax='p99',cmap="viridis"))
+                st.pyplot(sc.pl.violin(st.session_state['adata_merge_filtered'], [marker], groupby='leiden'))
+                #sc.pl.violin(adata_merge_filtered, [marker], groupby='leiden')
+            elif method == "UMAP":    
+                st.pyplot(sc.pl.umap(st.session_state['adata_merge_filtered'], color=[marker], s=50, frameon=False, vmax='p99',cmap="viridis"))
+                st.pyplot(sc.pl.violin(st.session_state['adata_merge_filtered'], [marker], groupby='leiden'))
+                #sc.pl.violin(adata_merge_filtered, [marker], groupby='leiden')
+        except:
+            print("plot error!")        
 ###############
 # return the cluster comparison using the differentially expressed gene analysis 
 
