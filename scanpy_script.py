@@ -540,7 +540,7 @@ with tab3:
             print('')
         compute_DEG(cluster_name,selected_cluster,referece_cluster)
     elif method_name in st.session_state['adata_merge_filtered'].uns.keys():
-        if (str(selected_cluster) not in pd.DataFrame(adata_merge_filtered.uns[method_name]['names']).keys()):
+        if (str(selected_cluster) not in pd.DataFrame(st.session_state['adata_merge_filtered'].uns[method_name]['names']).keys()):
             compute_DEG(cluster_name,selected_cluster,referece_cluster)
     #    st.stop()            
         
