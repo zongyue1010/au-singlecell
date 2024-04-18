@@ -427,7 +427,7 @@ with tab2:
     ###############
     st.header('Section 2: Show the marker expression mapping')
     if 'adata_merge_filtered' in st.session_state.keys():
-        adata_merge_filtered = st.session_state['adata_merge_filtered']
+        #adata_merge_filtered = st.session_state['adata_merge_filtered']
         ### default markers ### 
         marker = pd.read_csv('input/'+workingdir+'/'+'marker.txt',sep="\t")
         st.table(marker)
@@ -435,30 +435,30 @@ with tab2:
         markers = ["Itgam","Cd27","Klrb1c","Il2rb"]
         try:
             if method == "tSNE":
-                st.pyplot(sc.pl.tsne(adata_merge_filtered, color=markers, s=50, frameon=False, vmax='p99',ncols = 2,cmap="viridis"))
+                st.pyplot(sc.pl.tsne(st.session_state['adata_merge_filtered'], color=markers, s=50, frameon=False, vmax='p99',ncols = 2,cmap="viridis"))
             elif method == "UMAP":    
-                st.pyplot(sc.pl.umap(adata_merge_filtered, color=markers, s=50, frameon=False, vmax='p99',ncols = 2,cmap="viridis"))
+                st.pyplot(sc.pl.umap(st.session_state['adata_merge_filtered'], color=markers, s=50, frameon=False, vmax='p99',ncols = 2,cmap="viridis"))
         except:
             print("plot error!")
         with st.form("formStep2"):
             marker = st.selectbox(
             'marker',
-            tuple(adata_merge_filtered.var_names.sort_values()),
+            tuple(st.session_state['adata_merge_filtered'].var_names.sort_values()),
                 key="marker_box"
                 )     
             submit_button2 = st.form_submit_button("Plot!") #,on_click=trigger(step1_)
         if submit_button2:
             st.session_state['marker'] = marker
         # initiate the parameters #
-        marker = adata_merge_filtered.var_names.sort_values()[0] if 'marker' not in st.session_state.keys() else st.session_state['marker']  
+        marker = st.session_state['adata_merge_filtered'].var_names.sort_values()[0] if 'marker' not in st.session_state.keys() else st.session_state['marker']  
         method = "tSNE" if 'method' not in st.session_state.keys() else st.session_state['method']
         if method == "tSNE":
-            st.pyplot(sc.pl.tsne(adata_merge_filtered, color=[marker], s=50, frameon=False, vmax='p99',cmap="viridis"))
-            st.pyplot(sc.pl.violin(adata_merge_filtered, [marker], groupby='leiden'))
+            st.pyplot(sc.pl.tsne(st.session_state['adata_merge_filtered'], color=[marker], s=50, frameon=False, vmax='p99',cmap="viridis"))
+            st.pyplot(sc.pl.violin(st.session_state['adata_merge_filtered'], [marker], groupby='leiden'))
             #sc.pl.violin(adata_merge_filtered, [marker], groupby='leiden')
         elif method == "UMAP":    
-            st.pyplot(sc.pl.umap(adata_merge_filtered, color=[marker], s=50, frameon=False, vmax='p99',cmap="viridis"))
-            st.pyplot(sc.pl.violin(adata_merge_filtered, [marker], groupby='leiden'))
+            st.pyplot(sc.pl.umap(st.session_state['adata_merge_filtered'], color=[marker], s=50, frameon=False, vmax='p99',cmap="viridis"))
+            st.pyplot(sc.pl.violin(st.session_state['adata_merge_filtered'], [marker], groupby='leiden'))
             #sc.pl.violin(adata_merge_filtered, [marker], groupby='leiden')
         
 ###############
