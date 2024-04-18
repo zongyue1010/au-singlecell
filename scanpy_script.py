@@ -433,10 +433,13 @@ with tab2:
         st.table(marker)
         st.markdown(get_table_download_link(marker, fileName = " "+workingdir+' marker'), unsafe_allow_html=True) 
         markers = ["Itgam","Cd27","Klrb1c","Il2rb"]
-        if method == "tSNE":
-            st.pyplot(sc.pl.tsne(adata_merge_filtered, color=markers, s=50, frameon=False, vmax='p99',ncols = 2,cmap="viridis"))
-        elif method == "UMAP":    
-            st.pyplot(sc.pl.umap(adata_merge_filtered, color=markers, s=50, frameon=False, vmax='p99',ncols = 2,cmap="viridis"))
+        try:
+            if method == "tSNE":
+                st.pyplot(sc.pl.tsne(adata_merge_filtered, color=markers, s=50, frameon=False, vmax='p99',ncols = 2,cmap="viridis"))
+            elif method == "UMAP":    
+                st.pyplot(sc.pl.umap(adata_merge_filtered, color=markers, s=50, frameon=False, vmax='p99',ncols = 2,cmap="viridis"))
+        except:
+            print("plot error!")
         with st.form("formStep2"):
             marker = st.selectbox(
             'marker',
