@@ -30,7 +30,7 @@ pd.set_option("display.precision", 2)
 
 ### coloring library ###
 # color mapping of the gene expression #
-from matplotlib import cm
+import matplotlib.cm
 from matplotlib.colors import ListedColormap, LinearSegmentedColormap
 import scipy.spatial as sp, scipy.cluster.hierarchy as hc
 
@@ -70,8 +70,8 @@ def generateheatmap(mtx,deg_names,pag_ids,**kwargs):
         row_linkage = hc.linkage(sp.distance.pdist(mtx), method='average')
     
     # load the color scale using the cm
-    #top = cm.get_cmap('Blues_r', 56)
-    bottom = cm.get_cmap('Reds', 56)
+    #top = matplotlib.cm.get_cmap('Blues_r', 56)
+    bottom = matplotlib.cm.get_cmap('Reds', 56)
     newcolors = np.vstack(
                             (
                                 #top(np.linspace(0, 1, 56)),
@@ -149,8 +149,8 @@ def generateheatmap(mtx,deg_names,pag_ids,**kwargs):
 ### manually changed color scale ###
 # color in hex_map format
 colorUnit = 56
-top = cm.get_cmap('Blues_r', colorUnit)
-bottom = cm.get_cmap('Reds', colorUnit)
+top = matplotlib.cm.get_cmap('Blues_r', colorUnit)
+bottom = matplotlib.cm.get_cmap('Reds', colorUnit)
 newcolors = np.vstack((
     top(np.linspace(0, 1, 56)),([[1,1,1,1]]),
     bottom(np.linspace(0, 1, 56))
