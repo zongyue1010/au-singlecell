@@ -71,8 +71,8 @@ def generateheatmap(mtx,deg_names,pag_ids,**kwargs):
         row_linkage = hc.linkage(sp.distance.pdist(mtx), method='average')
     
     # load the color scale using the cm
-    #top = plt.cm.get_cmap('Blues_r', 56)
-    bottom = plt.cm.get_cmap('Reds', 56)
+    #top = plt.get_cmap('Blues_r', 56)
+    bottom = plt.get_cmap('Reds', 56)
     newcolors = np.vstack(
                             (
                                 #top(np.linspace(0, 1, 56)),
@@ -150,8 +150,8 @@ def generateheatmap(mtx,deg_names,pag_ids,**kwargs):
 ### manually changed color scale ###
 # color in hex_map format
 colorUnit = 56
-top = plt.cm.get_cmap('Blues_r', colorUnit)
-bottom = plt.cm.get_cmap('Reds', colorUnit)
+top = plt.get_cmap('Blues_r', colorUnit)
+bottom = plt.get_cmap('Reds', colorUnit)
 newcolors = np.vstack((
     top(np.linspace(0, 1, 56)),([[1,1,1,1]]),
     bottom(np.linspace(0, 1, 56))
