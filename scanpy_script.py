@@ -975,7 +975,8 @@ with tab5:
     sc.tl.dendrogram(adata_merge_filtered,groupby="leiden")
     if option == 'dotplot':      
         #dp = sc.pl.dotplot(adata_merge_filtered, marker_genes.values, groupby='leiden') # return_fig=True,categories_order=sel_cluster
-        st.pyplot(sc.pl.dotplot(adata_merge_filtered, marker_genes.values, groupby='leiden',cmap="viridis")) # , cmap='viridis' # .add_totals().style(dot_edge_color='black', dot_edge_lw=0.5,cmap="viridis").show()
+        dp = sc.pl.dotplot(adata_merge_filtered, marker_genes.values, groupby='leiden') # ,cmap="viridis"
+        st.pyplot(dp) # , cmap='viridis' # .add_totals().style(dot_edge_color='black', dot_edge_lw=0.5,cmap="viridis").show()
     elif option == 'heatmap':
         #sc.tl.dendrogram(adata_merge_filtered,groupby="leiden")
         st.pyplot(sc.pl.heatmap(adata_merge_filtered, marker_genes.values, groupby='leiden', swap_axes=True,cmap="viridis"))
