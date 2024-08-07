@@ -42,7 +42,7 @@ from matplotlib import rcParams
 
 ### multiple tabs load style ###
 ### ref: https://github.com/streamlit/streamlit/issues/233 ###
-st.set_option('deprecation.showPyplotGlobalUse', False)
+#st.set_option('deprecation.showPyplotGlobalUse', False)
 
 ### function ###
 def generateheatmap(mtx,deg_names,pag_ids,**kwargs):
