@@ -403,20 +403,22 @@ with tab1:
         if method == "tSNE":
             try:
                 fig, axs = plt.subplots(1, 1, figsize=(8,8),constrained_layout=True)
-                st.pyplot(sc.pl.tsne(st.session_state['adata_merge_filtered'], color="sample", title=" tSNE",frameon=True, #legend_loc='on data'
-                                    ))
-                st.pyplot(sc.pl.tsne(st.session_state['adata_merge_filtered'], color="leiden", title=" tSNE", add_outline=True, #legend_loc='on data',
-                           legend_fontsize=12, legend_fontoutline=2,frameon=True))
-                fig.off
+                sc.pl.tsne(st.session_state['adata_merge_filtered'], color="sample", title=" tSNE",frameon=True, #legend_loc='on data'
+                                    )
+                sc.pl.tsne(st.session_state['adata_merge_filtered'], color="leiden", title=" tSNE", add_outline=True, #legend_loc='on data',
+                           legend_fontsize=12, legend_fontoutline=2,frameon=True)
+                st.pyplot(fig)
+           
             except:
                 print("plot error!")
         elif method == "UMAP":
             try:
                 fig, axs = plt.subplots(1, 1, figsize=(8,8),constrained_layout=True)
-                st.pyplot(sc.pl.umap(st.session_state['adata_merge_filtered'], color="sample", title=" UMAP",frameon=True, #legend_loc='on data'
-                                    ))
-                st.pyplot(sc.pl.umap(st.session_state['adata_merge_filtered'], color="leiden", title=" UMAP", add_outline=True, #legend_loc='on data',
-                           legend_fontsize=12, legend_fontoutline=2,frameon=True))
+                sc.pl.umap(st.session_state['adata_merge_filtered'], color="sample", title=" UMAP",frameon=True, #legend_loc='on data'
+                                    )
+                sc.pl.umap(st.session_state['adata_merge_filtered'], color="leiden", title=" UMAP", add_outline=True, #legend_loc='on data',
+                           legend_fontsize=12, legend_fontoutline=2,frameon=True)
+                st.pyplot(fig)
             except:
                 print("plot error!")
         plot_map(st.session_state['adata_merge_filtered'],st.session_state['method'],st.session_state['sel_cluster'])
@@ -438,9 +440,11 @@ with tab2:
         try:
             fig, axs = plt.subplots(1, 1, figsize=(8,8),constrained_layout=True)
             if method == "tSNE":
-                st.pyplot(sc.pl.tsne(st.session_state['adata_merge_filtered'], color=markers, s=50, frameon=False, vmax='p99',ncols = 2,cmap="viridis"))
+                sc.pl.tsne(st.session_state['adata_merge_filtered'], color=markers, s=50, frameon=False, vmax='p99',ncols = 2,cmap="viridis")
+                st.pyplot(fig)
             elif method == "UMAP":    
-                st.pyplot(sc.pl.umap(st.session_state['adata_merge_filtered'], color=markers, s=50, frameon=False, vmax='p99',ncols = 2,cmap="viridis"))
+                sc.pl.umap(st.session_state['adata_merge_filtered'], color=markers, s=50, frameon=False, vmax='p99',ncols = 2,cmap="viridis")
+                st.pyplot(fig)
         except:
             print("plot error!")
         with st.form("formStep2"):
@@ -458,12 +462,15 @@ with tab2:
         try:
             fig, axs = plt.subplots(1, 1, figsize=(8,8),constrained_layout=True)
             if method == "tSNE":
-                st.pyplot(sc.pl.tsne(st.session_state['adata_merge_filtered'], color=[marker], s=50, frameon=False, vmax='p99',cmap="viridis"))
-                st.pyplot(sc.pl.violin(st.session_state['adata_merge_filtered'], [marker], groupby='leiden'))
+                sc.pl.tsne(st.session_state['adata_merge_filtered'], color=[marker], s=50, frameon=False, vmax='p99',cmap="viridis")
+                sc.pl.violin(st.session_state['adata_merge_filtered'], [marker], groupby='leiden')
+                st.pyplot(fig)
+
                 #sc.pl.violin(adata_merge_filtered, [marker], groupby='leiden')
             elif method == "UMAP":    
-                st.pyplot(sc.pl.umap(st.session_state['adata_merge_filtered'], color=[marker], s=50, frameon=False, vmax='p99',cmap="viridis"))
-                st.pyplot(sc.pl.violin(st.session_state['adata_merge_filtered'], [marker], groupby='leiden'))
+                sc.pl.umap(st.session_state['adata_merge_filtered'], color=[marker], s=50, frameon=False, vmax='p99',cmap="viridis")
+                sc.pl.violin(st.session_state['adata_merge_filtered'], [marker], groupby='leiden')
+                st.pyplot(fig)
                 #sc.pl.violin(adata_merge_filtered, [marker], groupby='leiden')
         except:
             print("plot error!")        
@@ -979,15 +986,19 @@ with tab5:
     fig, axs = plt.subplots(1, 1, figsize=(8,8),constrained_layout=True)
     if option == 'dotplot':      
         #dp = sc.pl.dotplot(adata_merge_filtered, marker_genes.values, groupby='leiden') # return_fig=True,categories_order=sel_cluster
-         # ,cmap="viridis"
-        st.pyplot(sc.pl.dotplot(adata_merge_filtered, marker_genes.values, groupby='leiden')) # , cmap='viridis' # .add_totals().style(dot_edge_color='black', dot_edge_lw=0.5,cmap="viridis").show()
+
+        sc.pl.dotplot(adata_merge_filtered, marker_genes.values, groupby='leiden' ,cmap="viridis")
+        st.pyplot(fig) # , cmap='viridis' # .add_totals().style(dot_edge_color='black', dot_edge_lw=0.5,cmap="viridis").show()
     elif option == 'heatmap':
         #sc.tl.dendrogram(adata_merge_filtered,groupby="leiden")
-        st.pyplot(sc.pl.heatmap(adata_merge_filtered, marker_genes.values, groupby='leiden', swap_axes=True,cmap="viridis"))
+        sc.pl.heatmap(adata_merge_filtered, marker_genes.values, groupby='leiden', swap_axes=True,cmap="viridis")
+        st.pyplot(fig)
     elif option == 'violin':
-        st.pyplot(sc.pl.stacked_violin(adata_merge_filtered, marker_genes.values, groupby='leiden',cmap="viridis")) # ,categories_order=sel_cluster
+        sc.pl.stacked_violin(adata_merge_filtered, marker_genes.values, groupby='leiden',cmap="viridis")
+        st.pyplot(fig) # ,categories_order=sel_cluster
     elif option == 'matrix':   
-        st.pyplot(sc.pl.matrixplot(adata_merge_filtered, marker_genes.values, groupby='leiden',cmap="viridis")) # ,categories_order=sel_cluster
+        sc.pl.matrixplot(adata_merge_filtered, marker_genes.values, groupby='leiden',cmap="viridis")
+        st.pyplot(fig) # ,categories_order=sel_cluster
     if np.size(np.array(expInNetwork))>0:
         zeroInNetwork=[[i,'0'] for i in idx2symbol.values() if i not in np.array(expInNetwork)[:,0]]
     else:
