@@ -7,8 +7,8 @@ import os
 import re
 import matplotlib
 import matplotlib.pyplot as plt #import matplotlib.cm
-import generateheatmap as Heatmap
-import generateNetwork as Network
+#import generateheatmap as Heatmap
+#import generateNetwork as Network
 import numpy as np
 import plotly.tools
 import base64
