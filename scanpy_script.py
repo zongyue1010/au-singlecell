@@ -411,8 +411,8 @@ with tab1:
                 sc.pl.tsne(st.session_state['adata_merge_filtered'], color="leiden", title=" tSNE", add_outline=True, #legend_loc='on data',
                            legend_fontsize=12, legend_fontoutline=2,frameon=True)
                 # Capture the current figure
-                fig = plt.gcf()
-                st.pyplot(fig)
+                fig1 = plt.gcf()
+                st.pyplot(fig1)
            
             except:
                 print("plot error!")
@@ -425,8 +425,8 @@ with tab1:
                 st.pyplot(fig)
                 sc.pl.umap(st.session_state['adata_merge_filtered'], color="leiden", title=" UMAP", add_outline=True, #legend_loc='on data',
                            legend_fontsize=12, legend_fontoutline=2,frameon=True)
-                fig = plt.gcf()
-                st.pyplot(fig)
+                fig1 = plt.gcf()
+                st.pyplot(fig1)
             except:
                 print("plot error!")
         plot_map(st.session_state['adata_merge_filtered'],st.session_state['method'],st.session_state['sel_cluster'])
