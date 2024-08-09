@@ -373,7 +373,7 @@ def plot_map(adata_merge_filtered,method,sel_cluster):
     fig.update_traces(hoverinfo='label+percent+value', textinfo='percent', textfont_size=10,
                       marker=dict(colors=['steelblue','darkorange','green'], line=dict(color='#000000', width=2)))
     st.plotly_chart(fig)
-    plt.close(fig)
+    plt.close()
 with tab1:
     st.header('Section 1: Show the single cell map using t-SNE* or UMAP* dimensional reduction')  
     with st.form("formStep1"):
@@ -414,7 +414,7 @@ with tab1:
                 # Capture the current figure
                 fig = plt.gcf()
                 st.pyplot(fig)
-                plt.close(fig)
+                plt.close()
             except:
                 print("plot error!")
         elif method == "UMAP":
@@ -429,7 +429,7 @@ with tab1:
                            legend_fontsize=12, legend_fontoutline=2,frameon=True)
                 fig = plt.gcf()
                 st.pyplot(fig)
-                plt.close(fig)
+                plt.close()
             except:
                 print("plot error!")
         plot_map(st.session_state['adata_merge_filtered'],st.session_state['method'],st.session_state['sel_cluster'])
@@ -454,12 +454,12 @@ with tab2:
                 sc.pl.tsne(st.session_state['adata_merge_filtered'], color=markers, s=50, frameon=False, vmax='p99',ncols = 2,cmap="viridis")
                 fig = plt.gcf()
                 st.pyplot(fig)
-                plt.close(fig)
+                plt.close()
             elif method == "UMAP":    
                 sc.pl.umap(st.session_state['adata_merge_filtered'], color=markers, s=50, frameon=False, vmax='p99',ncols = 2,cmap="viridis")
                 fig = plt.gcf()
                 st.pyplot(fig)
-                plt.close(fig)
+                plt.close()
         except:
             print("plot error!")
         with st.form("formStep2"):
@@ -481,14 +481,14 @@ with tab2:
                 sc.pl.violin(st.session_state['adata_merge_filtered'], [marker], groupby='leiden')
                 fig = plt.gcf()
                 st.pyplot(fig)
-                plt.close(fig)
+                plt.close()
                 #sc.pl.violin(adata_merge_filtered, [marker], groupby='leiden')
             elif method == "UMAP":    
                 sc.pl.umap(st.session_state['adata_merge_filtered'], color=[marker], s=50, frameon=False, vmax='p99',cmap="viridis")
                 sc.pl.violin(st.session_state['adata_merge_filtered'], [marker], groupby='leiden')
                 fig = plt.gcf()
                 st.pyplot(fig)
-                plt.close(fig)
+                plt.close()
                 #sc.pl.violin(adata_merge_filtered, [marker], groupby='leiden')
         except:
             print("plot error!")        
@@ -1008,23 +1008,23 @@ with tab5:
         sc.pl.dotplot(adata_merge_filtered, marker_genes.values, groupby='leiden' ,cmap="viridis")
         fig = plt.gcf()
         st.pyplot(fig) # , cmap='viridis' # .add_totals().style(dot_edge_color='black', dot_edge_lw=0.5,cmap="viridis").show()
-        plt.close(fig)
+        plt.close()
     elif option == 'heatmap':
         #sc.tl.dendrogram(adata_merge_filtered,groupby="leiden")
         sc.pl.heatmap(adata_merge_filtered, marker_genes.values, groupby='leiden', swap_axes=True,cmap="viridis")
         fig = plt.gcf()
         st.pyplot(fig)
-        plt.close(fig)
+        plt.close()
     elif option == 'violin':
         sc.pl.stacked_violin(adata_merge_filtered, marker_genes.values, groupby='leiden',cmap="viridis")
         fig = plt.gcf()
         st.pyplot(fig) # ,categories_order=sel_cluster
-        plt.close(fig)
+        plt.close()
     elif option == 'matrix':   
         sc.pl.matrixplot(adata_merge_filtered, marker_genes.values, groupby='leiden',cmap="viridis")
         fig = plt.gcf()
         st.pyplot(fig) # ,categories_order=sel_cluster
-        plt.close(fig)
+        plt.close()
     if np.size(np.array(expInNetwork))>0:
         zeroInNetwork=[[i,'0'] for i in idx2symbol.values() if i not in np.array(expInNetwork)[:,0]]
     else:
