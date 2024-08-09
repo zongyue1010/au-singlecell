@@ -347,7 +347,7 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import numpy as np
 
-pct =  adata_merge.obs[['leiden','sample','n_genes']].groupby(['leiden','sample']).count()
+pct =  adata_merge.obs[['leiden','sample','n_genes']].groupby(['leiden','sample'], observed=True).count()
 pct = pct.reset_index()  
 colors_custm = ['steelblue','darkorange','green']
 leiden_max = max(pct['leiden'].astype('int')) + 1
